@@ -1,8 +1,8 @@
 package server;
 
 import com.google.protobuf.ByteString;
-import com.source.producer.ProducerResponse;
-import com.source.producer.ProducerServiceGrpc;
+import com.source.queue.ResponseFromQueueSource;
+import com.source.queue.GetMessageFromQueueGrpc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ArrayBlockingQueue;
 
-public class ProducerEndpointImpl extends ProducerServiceGrpc.ProducerServiceImplBase implements Runnable {
+public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFromQueueImplBase implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(ProducerEndpointImpl.class);
     private String path;
@@ -47,13 +47,15 @@ public class ProducerEndpointImpl extends ProducerServiceGrpc.ProducerServiceImp
     }
 
     @Override
-    public void getItem(com.source.producer.ProducerRequest request,
-                        io.grpc.stub.StreamObserver<com.source.producer.ProducerResponse> responseObserver) {
+    public void getItem(com.source.queue.RequestFromSink request,
+                        io.grpc.stub.StreamObserver<com.source.queue.ResponseFromQueueSource> responseObserver) {
 
-        ProducerResponse response = ProducerResponse.newBuilder().
+        ResponseFromQueueSource response = ResponseFromQueueSource.newBuilder().
                 setFile(ByteString.copyFrom(this.arrayBlockingQueue.poll())).
                 build();
+
         log.info("Queue size is - {}", this.arrayBlockingQueue.size());
+
         responseObserver.onNext(response);
         responseObserver.onCompleted();
 

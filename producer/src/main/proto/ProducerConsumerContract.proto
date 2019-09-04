@@ -1,9 +1,9 @@
 syntax = "proto3";
 
-package producergrpc;
+package queue;
 
-option java_package = "com.source.producer";
-option java_outer_classname = "Producer";
+option java_package = "com.source.queue";
+option java_outer_classname = "queue";
 option java_multiple_files = true;
 option optimize_for = SPEED;
 
@@ -11,14 +11,14 @@ option optimize_for = SPEED;
     * Assuming Producer Response can be 1 file or more (In byte format)
 */
 
-message ProducerResponse {
+message ResponseFromQueueSource {
     bytes file = 1;
 }
 
-message ProducerRequest {
+message RequestFromSink {
 
 }
 
-service ProducerService {
-    rpc getItem(ProducerRequest) returns (ProducerResponse) {}
+service GetMessageFromQueue {
+    rpc getItem(RequestFromSink) returns (ResponseFromQueueSource) {}
 }

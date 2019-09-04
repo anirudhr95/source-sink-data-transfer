@@ -4,6 +4,7 @@ import com.linecorp.armeria.server.Server;
 import com.linecorp.armeria.server.ServerBuilder;
 import com.linecorp.armeria.server.grpc.GrpcServiceBuilder;
 import com.linecorp.armeria.server.logging.LoggingService;
+import com.linecorp.armeria.server.docs.DocService;
 
 public class ProducerServer {
 
@@ -21,8 +22,10 @@ public class ProducerServer {
                         .build()
         );
 
+        sb.serviceUnder("/docs", new DocService());
+
         Server server = sb.build();
-        server.start();
+        server.start().join();
     }
 
 
