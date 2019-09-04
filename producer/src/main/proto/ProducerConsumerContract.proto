@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package producergrpc;
+
+option java_package = "com.source.producer";
+option java_outer_classname = "Producer";
+option java_multiple_files = true;
+option optimize_for = SPEED;
+
+/*
+    * Assuming Producer Response can be 1 file or more (In byte format)
+*/
+
+message ProducerResponse {
+    bytes file = 1;
+}
+
+message ProducerRequest {
+
+}
+
+service ProducerService {
+    rpc getItem(ProducerRequest) returns (ProducerResponse) {}
+}

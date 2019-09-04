@@ -1,0 +1,115 @@
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'com.google.protobuf'
+apply plugin: 'application'
+
+
+group 'com.queue'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+}
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.8'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.4'
+
+    }
+}
+
+//dependencyManagement {
+//    imports {
+//        mavenBom 'io.netty:netty-bom:4.1.39.Final'
+//        mavenBom 'com.linecorp.armeria:armeria-bom:0.90.3'
+//    }
+//}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.9.0"
+    }
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.23.0'
+        }
+    }
+
+    generateProtoTasks.generatedFilesBaseDir = 'generated-sources'
+
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+}
+
+dependencies {
+
+    ['armeria',
+     'armeria-grpc',
+     'armeria-rxjava',
+    ].each {
+        compile "com.linecorp.armeria:${it}:0.90.3"
+    }
+
+    // Logging
+    runtime 'ch.qos.logback:logback-classic:1.2.3'
+    runtime 'org.slf4j:log4j-over-slf4j:1.7.28'
+
+    compile group: 'io.grpc', name: 'grpc-netty', version: '1.23.0'
+    compile group: 'io.grpc', name: 'grpc-protobuf', version: '1.23.0'
+    compile group: 'io.grpc', name: 'grpc-stub', version: '1.23.0'
+    compile group: 'io.grpc', name: 'grpc-services', version: '1.23.0'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+}
+
+tasks.withType(JavaCompile) {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+    options.encoding = 'UTF-8'
+    options.debug = true
+    options.compilerArgs += '-parameters'
+}
+
+sourceSets {
+    main {
+        proto {
+            srcDir 'src/main/proto'
+        }
+        java {
+            // include self written and generated code
+            srcDirs 'src/main/java', 'generated-sources/main/java', 'generated-sources/main/grpc'
+        }
+    }
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'server.ProducerServer'
+        )
+    }
+}
+
+mainClassName = "server.ProducerServer"
+apply plugin: 'com.github.johnrengelman.shadow'
+
+shadowJar {
+    manifest {
+        attributes(
+                'Main-Class': 'server.ProducerServer'
+        )
+    }
+}
+
