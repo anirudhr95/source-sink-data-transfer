@@ -12,7 +12,7 @@ option optimize_for = SPEED;
 */
 
 message ResponseFromQueueSource {
-    bytes file = 1;
+    repeated bytes file = 1;
 }
 
 message RequestFromSink {

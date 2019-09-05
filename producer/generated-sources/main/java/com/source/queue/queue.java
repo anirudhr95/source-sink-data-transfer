@@ -34,7 +34,7 @@ public final class queue {
   static {
     java.lang.String[] descriptorData = {
       "\n\036ProducerConsumerContract.proto\022\005queue\"" +
-      "\'\n\027ResponseFromQueueSource\022\014\n\004file\030\001 \001(\014" +
+      "\'\n\027ResponseFromQueueSource\022\014\n\004file\030\001 \003(\014" +
       "\"\021\n\017RequestFromSink2Z\n\023GetMessageFromQue" +
       "ue\022C\n\007getItem\022\026.queue.RequestFromSink\032\036." +
       "queue.ResponseFromQueueSource\"\000B\035\n\020com.s" +

@@ -50,9 +50,19 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
     public void getItem(com.source.queue.RequestFromSink request,
                         io.grpc.stub.StreamObserver<com.source.queue.ResponseFromQueueSource> responseObserver) {
 
-        ResponseFromQueueSource response = ResponseFromQueueSource.newBuilder().
-                setFile(ByteString.copyFrom(this.arrayBlockingQueue.poll())).
-                build();
+        ResponseFromQueueSource.Builder responseBuilderObj = ResponseFromQueueSource.newBuilder();
+
+        for(int i = 0 ; i < 5; i++) {
+            byte[] file = this.arrayBlockingQueue.poll();
+
+            if(file == null)
+                break;
+
+            responseBuilderObj.addFile(ByteString.copyFrom(file));
+        }
+
+
+        ResponseFromQueueSource response = responseBuilderObj.build();
 
         log.info("Queue size is - {}", this.arrayBlockingQueue.size());
 
@@ -74,7 +84,7 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
         } catch (ArithmeticException ae) {
             safeQueueSize = 300;
         }
-        log.info("Setting the queue size to - {}", safeQueueSize);
+        log.info("Setting the maximum ideal queue size to - {}", safeQueueSize);
         return safeQueueSize;
     }
 

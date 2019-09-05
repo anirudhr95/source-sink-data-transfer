@@ -16,7 +16,7 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private ResponseFromQueueSource() {
-    file_ = com.google.protobuf.ByteString.EMPTY;
+    file_ = java.util.Collections.emptyList();
   }
 
   @java.lang.Override
@@ -39,6 +39,7 @@ private static final long serialVersionUID = 0L;
     if (extensionRegistry == null) {
       throw new java.lang.NullPointerException();
     }
+    int mutable_bitField0_ = 0;
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
         com.google.protobuf.UnknownFieldSet.newBuilder();
     try {
@@ -50,8 +51,11 @@ private static final long serialVersionUID = 0L;
             done = true;
             break;
           case 10: {
-
-            file_ = input.readBytes();
+            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+              file_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
+              mutable_bitField0_ |= 0x00000001;
+            }
+            file_.add(input.readBytes());
             break;
           }
           default: {
@@ -69,6 +73,9 @@ private static final long serialVersionUID = 0L;
       throw new com.google.protobuf.InvalidProtocolBufferException(
           e).setUnfinishedMessage(this);
     } finally {
+      if (((mutable_bitField0_ & 0x00000001) != 0)) {
+        file_ = java.util.Collections.unmodifiableList(file_); // C
+      }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
     }
@@ -87,12 +94,25 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int FILE_FIELD_NUMBER = 1;
-  private com.google.protobuf.ByteString file_;
+  private java.util.List<com.google.protobuf.ByteString> file_;
   /**
-   * <code>bytes file = 1;</code>
+   * <code>repeated bytes file = 1;</code>
    */
-  public com.google.protobuf.ByteString getFile() {
+  public java.util.List<com.google.protobuf.ByteString>
+      getFileList() {
     return file_;
+  }
+  /**
+   * <code>repeated bytes file = 1;</code>
+   */
+  public int getFileCount() {
+    return file_.size();
+  }
+  /**
+   * <code>repeated bytes file = 1;</code>
+   */
+  public com.google.protobuf.ByteString getFile(int index) {
+    return file_.get(index);
   }
 
   private byte memoizedIsInitialized = -1;
@@ -109,8 +129,8 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (!file_.isEmpty()) {
-      output.writeBytes(1, file_);
+    for (int i = 0; i < file_.size(); i++) {
+      output.writeBytes(1, file_.get(i));
     }
     unknownFields.writeTo(output);
   }
@@ -121,9 +141,14 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (!file_.isEmpty()) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeBytesSize(1, file_);
+    {
+      int dataSize = 0;
+      for (int i = 0; i < file_.size(); i++) {
+        dataSize += com.google.protobuf.CodedOutputStream
+          .computeBytesSizeNoTag(file_.get(i));
+      }
+      size += dataSize;
+      size += 1 * getFileList().size();
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -140,8 +165,8 @@ private static final long serialVersionUID = 0L;
     }
     com.sink.queue.ResponseFromQueueSource other = (com.sink.queue.ResponseFromQueueSource) obj;
 
-    if (!getFile()
-        .equals(other.getFile())) return false;
+    if (!getFileList()
+        .equals(other.getFileList())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -153,8 +178,10 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + FILE_FIELD_NUMBER;
-    hash = (53 * hash) + getFile().hashCode();
+    if (getFileCount() > 0) {
+      hash = (37 * hash) + FILE_FIELD_NUMBER;
+      hash = (53 * hash) + getFileList().hashCode();
+    }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -288,8 +315,8 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      file_ = com.google.protobuf.ByteString.EMPTY;
-
+      file_ = java.util.Collections.emptyList();
+      bitField0_ = (bitField0_ & ~0x00000001);
       return this;
     }
 
@@ -316,6 +343,11 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.sink.queue.ResponseFromQueueSource buildPartial() {
       com.sink.queue.ResponseFromQueueSource result = new com.sink.queue.ResponseFromQueueSource(this);
+      int from_bitField0_ = bitField0_;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        file_ = java.util.Collections.unmodifiableList(file_);
+        bitField0_ = (bitField0_ & ~0x00000001);
+      }
       result.file_ = file_;
       onBuilt();
       return result;
@@ -365,8 +397,15 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(com.sink.queue.ResponseFromQueueSource other) {
       if (other == com.sink.queue.ResponseFromQueueSource.getDefaultInstance()) return this;
-      if (other.getFile() != com.google.protobuf.ByteString.EMPTY) {
-        setFile(other.getFile());
+      if (!other.file_.isEmpty()) {
+        if (file_.isEmpty()) {
+          file_ = other.file_;
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          ensureFileIsMutable();
+          file_.addAll(other.file_);
+        }
+        onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -396,32 +435,77 @@ private static final long serialVersionUID = 0L;
       }
       return this;
     }
+    private int bitField0_;
 
-    private com.google.protobuf.ByteString file_ = com.google.protobuf.ByteString.EMPTY;
-    /**
-     * <code>bytes file = 1;</code>
-     */
-    public com.google.protobuf.ByteString getFile() {
-      return file_;
+    private java.util.List<com.google.protobuf.ByteString> file_ = java.util.Collections.emptyList();
+    private void ensureFileIsMutable() {
+      if (!((bitField0_ & 0x00000001) != 0)) {
+        file_ = new java.util.ArrayList<com.google.protobuf.ByteString>(file_);
+        bitField0_ |= 0x00000001;
+       }
     }
     /**
-     * <code>bytes file = 1;</code>
+     * <code>repeated bytes file = 1;</code>
      */
-    public Builder setFile(com.google.protobuf.ByteString value) {
+    public java.util.List<com.google.protobuf.ByteString>
+        getFileList() {
+      return ((bitField0_ & 0x00000001) != 0) ?
+               java.util.Collections.unmodifiableList(file_) : file_;
+    }
+    /**
+     * <code>repeated bytes file = 1;</code>
+     */
+    public int getFileCount() {
+      return file_.size();
+    }
+    /**
+     * <code>repeated bytes file = 1;</code>
+     */
+    public com.google.protobuf.ByteString getFile(int index) {
+      return file_.get(index);
+    }
+    /**
+     * <code>repeated bytes file = 1;</code>
+     */
+    public Builder setFile(
+        int index, com.google.protobuf.ByteString value) {
       if (value == null) {
     throw new NullPointerException();
   }
-  
-      file_ = value;
+  ensureFileIsMutable();
+      file_.set(index, value);
       onChanged();
       return this;
     }
     /**
-     * <code>bytes file = 1;</code>
+     * <code>repeated bytes file = 1;</code>
+     */
+    public Builder addFile(com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureFileIsMutable();
+      file_.add(value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated bytes file = 1;</code>
+     */
+    public Builder addAllFile(
+        java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
+      ensureFileIsMutable();
+      com.google.protobuf.AbstractMessageLite.Builder.addAll(
+          values, file_);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>repeated bytes file = 1;</code>
      */
     public Builder clearFile() {
-      
-      file_ = getDefaultInstance().getFile();
+      file_ = java.util.Collections.emptyList();
+      bitField0_ = (bitField0_ & ~0x00000001);
       onChanged();
       return this;
     }

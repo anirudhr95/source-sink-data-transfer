@@ -8,7 +8,15 @@ public interface ResponseFromQueueSourceOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>bytes file = 1;</code>
+   * <code>repeated bytes file = 1;</code>
    */
-  com.google.protobuf.ByteString getFile();
+  java.util.List<com.google.protobuf.ByteString> getFileList();
+  /**
+   * <code>repeated bytes file = 1;</code>
+   */
+  int getFileCount();
+  /**
+   * <code>repeated bytes file = 1;</code>
+   */
+  com.google.protobuf.ByteString getFile(int index);
 }
