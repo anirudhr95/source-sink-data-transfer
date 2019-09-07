@@ -60,6 +60,21 @@ public class PerformRequestAndSaveFile implements Runnable {
                         isQueueEmpty = true;
                     }
 
+/*
+        Note for future dev who tries this: Don't, Parallel only makes it slower.
+        I benchmarked!
+                    fileList.parallelStream().forEach(byteString -> {
+                        ResponseJsonPojo responseJsonPojo = null;
+                        try {
+                            responseJsonPojo = objectMapper.readValue(byteString.toStringUtf8(), ResponseJsonPojo.class);
+                            objectMapper.writeValue(new File(responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
+                        } catch (Exception e) {
+                            log.error("Error while parsing JSON / Writing to file for JSON - ", byteString.toStringUtf8(), e);
+                        }
+
+                    });
+*/
+
                     for (ByteString byteString : fileList) {
 
                         try {
@@ -74,7 +89,7 @@ public class PerformRequestAndSaveFile implements Runnable {
 
                 @Override
                 public void onFailure(Throwable t) {
-                    t.printStackTrace();
+                    log.error("Error getting response from endpoint, Reason:", t);
                 }
             }, MoreExecutors.directExecutor());
 
