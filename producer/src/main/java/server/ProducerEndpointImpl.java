@@ -27,6 +27,7 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
     @Override
     public void run() {
         Path sourceFolder = Paths.get(this.path);
+        boolean directoryExists = true;
         DirectoryStream<Path> stream = null;
         try {
             stream = Files.newDirectoryStream(sourceFolder); //TODO: Parallelize this
@@ -35,14 +36,22 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
                 arrayBlockingQueue.put(Files.readAllBytes(path));
             }
 
+
         } catch (Exception e) {
             log.error("Error while trying to traverse directory - {}", this.path, e);
+            log.warn("Cannot find source folder - !!Exiting!!");
+            directoryExists = false;
+
         } finally {
+
             try {
                 stream.close();
             } catch (IOException e) {
                 log.error("Error closing DirectoryStream, Reason - ", e);
             }
+
+            if(!directoryExists)
+                System.exit(0);
         }
     }
 
@@ -61,10 +70,8 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
             responseBuilderObj.addFile(ByteString.copyFrom(file));
         }
 
-
         ResponseFromQueueSource response = responseBuilderObj.build();
 
-        log.info("Queue size is - {}", this.arrayBlockingQueue.size());
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();

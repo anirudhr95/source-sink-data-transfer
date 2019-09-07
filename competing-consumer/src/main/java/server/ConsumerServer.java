@@ -1,47 +1,35 @@
 package server;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
-import com.linecorp.armeria.client.Clients;
-import com.sink.queue.GetMessageFromQueueGrpc.*;
-import com.sink.queue.*;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ConsumerServer {
 
-    public static void main(String[] args) {
+    private static final Logger log = LoggerFactory.getLogger(ConsumerServer.class);
+    private static final int idealNumberOfThreads = (Runtime.getRuntime().availableProcessors() + 1);
 
-        GetMessageFromQueueFutureStub sinkResponseAsyncStub = Clients.newClient(
-                "gproto+http://127.0.0.1:4242/",
-                GetMessageFromQueueFutureStub.class);
+    public static void main(String[] args) throws InterruptedException {
 
-        RequestFromSink request = RequestFromSink.newBuilder().build();
-        ListenableFuture<ResponseFromQueueSource> future = sinkResponseAsyncStub.getItem(request);
+        log.info("Crawling parallely using {} threads", idealNumberOfThreads);
 
-        Futures.addCallback(future, new FutureCallback<ResponseFromQueueSource>() {
-            @Override
-            public void onSuccess(@NullableDecl ResponseFromQueueSource result) {
-                System.out.println(result);
-            }
+        long startTime = System.nanoTime();
 
-            @Override
-            public void onFailure(Throwable t) {
-                t.printStackTrace();
-            }
-        }, MoreExecutors.directExecutor());
+        ExecutorService executorService = Executors.newFixedThreadPool(idealNumberOfThreads);
 
-        try {
-            ResponseFromQueueSource response = future.get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+        for(int i = 0; i < idealNumberOfThreads; i++) {
+            executorService.execute(new PerformRequestAndSaveFile());
         }
 
+        executorService.shutdown();
+
+        while( ! executorService.isTerminated() ) {
+
+        }
+
+       log.info("Total time taken - " + (System.nanoTime() - startTime) + " ns");
     }
 
 }

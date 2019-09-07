@@ -12,7 +12,8 @@ public class ProducerServer {
         ServerBuilder sb = new ServerBuilder();
         sb.http(4242);
 
-        ProducerEndpointImpl producerEndpoint = new ProducerEndpointImpl("/Users/anirudhr/Desktop/sampleData");
+        ProducerEndpointImpl producerEndpoint = new ProducerEndpointImpl("/Users/anirudhr/Desktop/sampleData3Sept2019");
+
         Thread thread = new Thread(producerEndpoint);
         thread.start();
 
