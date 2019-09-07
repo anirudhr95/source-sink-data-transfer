@@ -16,8 +16,11 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFromQueueImplBase implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(ProducerEndpointImpl.class);
+
     private String path;
     private ArrayBlockingQueue<byte[]> arrayBlockingQueue;
+
+    private static final int idealBatchSize = 5;        // Try batching and send files
 
     ProducerEndpointImpl(String path) {
         this.path = path;
@@ -26,6 +29,7 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
 
     @Override
     public void run() {
+
         Path sourceFolder = Paths.get(this.path);
         boolean directoryExists = true;
         DirectoryStream<Path> stream = null;
@@ -53,6 +57,7 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
             if(!directoryExists)
                 System.exit(0);
         }
+
     }
 
     @Override
@@ -61,7 +66,7 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
 
         ResponseFromQueueSource.Builder responseBuilderObj = ResponseFromQueueSource.newBuilder();
 
-        for(int i = 0 ; i < 5; i++) {
+        for(int i = 0 ; i < this.idealBatchSize; i++) {
             byte[] file = this.arrayBlockingQueue.poll();
 
             if(file == null)

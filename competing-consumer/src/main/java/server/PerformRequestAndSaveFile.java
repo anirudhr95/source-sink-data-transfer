@@ -25,7 +25,10 @@ public class PerformRequestAndSaveFile implements Runnable {
 
     private GetMessageFromQueueGrpc.GetMessageFromQueueFutureStub sinkResponseAsyncStub;
     private RequestFromSink request;
+
+    //This is an expensive object. Creating 1 for thread an at the beginning.
     private static final ObjectMapper objectMapper = new ObjectMapper();
+
     private ListenableFuture<ResponseFromQueueSource> future;
     private boolean isQueueEmpty;
 
@@ -78,9 +81,9 @@ public class PerformRequestAndSaveFile implements Runnable {
             try {
                 ResponseFromQueueSource response = future.get();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                log.error("Cannot get response from GRPC endpoint, FUTURE.get() Interrupted", e);
             } catch (ExecutionException e) {
-                e.printStackTrace();
+                log.error("Error executing future.get() for GRPC endpoint, Reason: ", e);
             }
         }
 

@@ -19,3 +19,18 @@
 2019-09-07 18:30:32,441 INFO com.linecorp.armeria.server.docs.DocStringExtractor [main] Using com.linecorp.armeria.grpc.descriptorDir: META-INF/armeria/grpc
 2019-09-07 18:30:32,640 INFO com.linecorp.armeria.internal.shaded.reflections.Reflections [globalEventExecutor-3-1] Reflections took 3 ms to scan 1 urls, producing 1 keys and 1 values 
 2019-09-07 18:30:32,938 INFO com.linecorp.armeria.server.Server [armeria-boss-http-*:4242] Serving HTTP at /0:0:0:0:0:0:0:0:4242 - http://127.0.0.1:4242/
+2019-09-07 18:36:16,757 INFO com.linecorp.armeria.server.docs.DocStringExtractor [main] Using com.linecorp.armeria.grpc.descriptorDir: META-INF/armeria/grpc
+2019-09-07 18:36:16,942 INFO com.linecorp.armeria.internal.shaded.reflections.Reflections [globalEventExecutor-3-1] Reflections took 4 ms to scan 1 urls, producing 1 keys and 1 values 
+2019-09-07 18:36:17,231 INFO com.linecorp.armeria.server.Server [armeria-boss-http-*:4242] Serving HTTP at /0:0:0:0:0:0:0:0:4242 - http://127.0.0.1:4242/
+2019-09-07 18:51:00,770 INFO com.linecorp.armeria.server.docs.DocStringExtractor [main] Using com.linecorp.armeria.grpc.descriptorDir: META-INF/armeria/grpc
+2019-09-07 18:51:00,988 INFO com.linecorp.armeria.internal.shaded.reflections.Reflections [globalEventExecutor-3-1] Reflections took 4 ms to scan 1 urls, producing 1 keys and 1 values 
+2019-09-07 18:51:01,352 INFO com.linecorp.armeria.server.Server [armeria-boss-http-*:4242] Serving HTTP at /0:0:0:0:0:0:0:0:4242 - http://127.0.0.1:4242/
+2019-09-07 18:52:35,408 INFO com.linecorp.armeria.server.docs.DocStringExtractor [main] Using com.linecorp.armeria.grpc.descriptorDir: META-INF/armeria/grpc
+2019-09-07 18:52:35,722 INFO com.linecorp.armeria.internal.shaded.reflections.Reflections [globalEventExecutor-3-1] Reflections took 8 ms to scan 1 urls, producing 1 keys and 1 values 
+2019-09-07 18:52:35,975 INFO com.linecorp.armeria.server.Server [armeria-boss-http-*:4242] Serving HTTP at /0:0:0:0:0:0:0:0:4242 - http://127.0.0.1:4242/
+2019-09-07 18:55:48,696 INFO com.linecorp.armeria.server.docs.DocStringExtractor [main] Using com.linecorp.armeria.grpc.descriptorDir: META-INF/armeria/grpc
+2019-09-07 18:55:48,931 INFO com.linecorp.armeria.internal.shaded.reflections.Reflections [globalEventExecutor-3-1] Reflections took 4 ms to scan 1 urls, producing 1 keys and 1 values 
+2019-09-07 18:55:49,323 INFO com.linecorp.armeria.server.Server [armeria-boss-http-*:4242] Serving HTTP at /0:0:0:0:0:0:0:0:4242 - http://127.0.0.1:4242/
+2019-09-07 18:57:16,366 INFO com.linecorp.armeria.server.docs.DocStringExtractor [main] Using com.linecorp.armeria.grpc.descriptorDir: META-INF/armeria/grpc
+2019-09-07 18:57:16,562 INFO com.linecorp.armeria.internal.shaded.reflections.Reflections [globalEventExecutor-3-1] Reflections took 4 ms to scan 1 urls, producing 1 keys and 1 values 
+2019-09-07 18:57:16,742 INFO com.linecorp.armeria.server.Server [armeria-boss-http-*:4242] Serving HTTP at /0:0:0:0:0:0:0:0:4242 - http://127.0.0.1:4242/
