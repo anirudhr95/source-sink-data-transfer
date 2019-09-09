@@ -33,9 +33,9 @@ public class PerformRequestAndSaveFile implements Runnable {
     private boolean isQueueEmpty;
 
 
-    PerformRequestAndSaveFile() {
+    PerformRequestAndSaveFile(String endpointURL) {
         this.sinkResponseAsyncStub = Clients.newClient(
-                "gproto+http://127.0.0.1:4242/",
+                "gproto+http://" + endpointURL,
                 GetMessageFromQueueGrpc.GetMessageFromQueueFutureStub.class);
 
         this.request = RequestFromSink.newBuilder().build();
