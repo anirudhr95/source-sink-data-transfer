@@ -17,23 +17,23 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
 
     private static final Logger log = LoggerFactory.getLogger(ProducerEndpointImpl.class);
 
-    private String path;
+    private Path path;
     private ArrayBlockingQueue<byte[]> arrayBlockingQueue;
 
     private static final int idealBatchSize = 5;        // Try batching and send files
 
-    ProducerEndpointImpl(String path) {
+    ProducerEndpointImpl(Path path) {
         this.path = path;
         this.arrayBlockingQueue = new ArrayBlockingQueue<byte[]>(this.getSafeSizeForQueue());
     }
 
-    @Override
+
+	@Override
     public void run() {
 
-        Path sourceFolder = Paths.get(this.path);
         DirectoryStream<Path> stream = null;
         try {
-            stream = Files.newDirectoryStream(sourceFolder); //TODO: Parallelize this
+            stream = Files.newDirectoryStream(this.path); //TODO: Parallelize this
 
 //            java.util.stream.Stream<Path> s = java.util.stream.StreamSupport.stream(stream.spliterator(), false);
 
