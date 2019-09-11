@@ -20,5 +20,5 @@ message RequestFromSink {
 }
 
 service GetMessageFromQueue {
-    rpc getItem(RequestFromSink) returns (ResponseFromQueueSource) {}
+    rpc getItem(RequestFromSink) returns (stream ResponseFromQueueSource) {}
 }

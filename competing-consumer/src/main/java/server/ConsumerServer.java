@@ -17,10 +17,7 @@ public class ConsumerServer {
 
     private static final Logger log = LoggerFactory.getLogger(ConsumerServer.class);
 
-    /*
-        If I use availableProcessors() I don't need to worry if the processors are hyper-threaded
-        as it returns the right number.
-     */
+    // If I use availableProcessors() I don't need to worry if the processors are hyper-threaded
     private static final int idealNumberOfThreads = (Runtime.getRuntime().availableProcessors() + 1);
 
     public static void main(String[] args) throws InterruptedException {
@@ -28,7 +25,7 @@ public class ConsumerServer {
     	CommandLine commandLine = getCommandLineParser(args);
     	String endpoint = commandLine.getOptionValue("e");
 
-        log.info("Crawling parallely using {} threads", idealNumberOfThreads);
+        log.info("Using {} threads to get files", idealNumberOfThreads);
 
         long startTime = System.nanoTime();     // »-(¯`·.·´¯)-> PRECISION BOIS <-(¯`·.·´¯)-«
 
@@ -51,7 +48,6 @@ public class ConsumerServer {
     	
     	Options options = new Options();
     	
-    	
     	Option producerEndpoint = new Option("e", "endpoint", true, "Producer endpoint URL");
     	producerEndpoint.setRequired(true);
     	options.addOption(producerEndpoint);
@@ -69,7 +65,6 @@ public class ConsumerServer {
     	}
     	
     	return commandLine;
-    	
     }
 
 }

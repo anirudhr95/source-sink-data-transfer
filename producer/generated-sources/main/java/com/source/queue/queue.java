@@ -35,10 +35,10 @@ public final class queue {
     java.lang.String[] descriptorData = {
       "\n\036ProducerConsumerContract.proto\022\005queue\"" +
       "\'\n\027ResponseFromQueueSource\022\014\n\004file\030\001 \003(\014" +
-      "\"\021\n\017RequestFromSink2Z\n\023GetMessageFromQue" +
-      "ue\022C\n\007getItem\022\026.queue.RequestFromSink\032\036." +
-      "queue.ResponseFromQueueSource\"\000B\035\n\020com.s" +
-      "ource.queueB\005queueH\001P\001b\006proto3"
+      "\"\021\n\017RequestFromSink2\\\n\023GetMessageFromQue" +
+      "ue\022E\n\007getItem\022\026.queue.RequestFromSink\032\036." +
+      "queue.ResponseFromQueueSource\"\0000\001B\035\n\020com" +
+      ".source.queueB\005queueH\001P\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

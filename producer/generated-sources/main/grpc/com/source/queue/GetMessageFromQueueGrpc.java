@@ -34,7 +34,7 @@ public final class GetMessageFromQueueGrpc {
       fullMethodName = SERVICE_NAME + '/' + "getItem",
       requestType = com.source.queue.RequestFromSink.class,
       responseType = com.source.queue.ResponseFromQueueSource.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+      methodType = io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
   public static io.grpc.MethodDescriptor<com.source.queue.RequestFromSink,
       com.source.queue.ResponseFromQueueSource> getGetItemMethod() {
     io.grpc.MethodDescriptor<com.source.queue.RequestFromSink, com.source.queue.ResponseFromQueueSource> getGetItemMethod;
@@ -43,7 +43,7 @@ public final class GetMessageFromQueueGrpc {
         if ((getGetItemMethod = GetMessageFromQueueGrpc.getGetItemMethod) == null) {
           GetMessageFromQueueGrpc.getGetItemMethod = getGetItemMethod =
               io.grpc.MethodDescriptor.<com.source.queue.RequestFromSink, com.source.queue.ResponseFromQueueSource>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setType(io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "getItem"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
@@ -96,7 +96,7 @@ public final class GetMessageFromQueueGrpc {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
             getGetItemMethod(),
-            asyncUnaryCall(
+            asyncServerStreamingCall(
               new MethodHandlers<
                 com.source.queue.RequestFromSink,
                 com.source.queue.ResponseFromQueueSource>(
@@ -127,7 +127,7 @@ public final class GetMessageFromQueueGrpc {
      */
     public void getItem(com.source.queue.RequestFromSink request,
         io.grpc.stub.StreamObserver<com.source.queue.ResponseFromQueueSource> responseObserver) {
-      asyncUnaryCall(
+      asyncServerStreamingCall(
           getChannel().newCall(getGetItemMethod(), getCallOptions()), request, responseObserver);
     }
   }
@@ -152,8 +152,9 @@ public final class GetMessageFromQueueGrpc {
 
     /**
      */
-    public com.source.queue.ResponseFromQueueSource getItem(com.source.queue.RequestFromSink request) {
-      return blockingUnaryCall(
+    public java.util.Iterator<com.source.queue.ResponseFromQueueSource> getItem(
+        com.source.queue.RequestFromSink request) {
+      return blockingServerStreamingCall(
           getChannel(), getGetItemMethod(), getCallOptions(), request);
     }
   }
@@ -174,14 +175,6 @@ public final class GetMessageFromQueueGrpc {
     protected GetMessageFromQueueFutureStub build(io.grpc.Channel channel,
         io.grpc.CallOptions callOptions) {
       return new GetMessageFromQueueFutureStub(channel, callOptions);
-    }
-
-    /**
-     */
-    public com.google.common.util.concurrent.ListenableFuture<com.source.queue.ResponseFromQueueSource> getItem(
-        com.source.queue.RequestFromSink request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetItemMethod(), getCallOptions()), request);
     }
   }
 

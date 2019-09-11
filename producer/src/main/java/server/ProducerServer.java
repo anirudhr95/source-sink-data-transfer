@@ -42,16 +42,17 @@ public class ProducerServer {
  
         ServerBuilder sb = new ServerBuilder();
         sb.http(portNumber);          // Set port for Netty
+        
+        
+        InternalQueueImplementation internalQueueImplementation = InternalQueueImplementation.getSingletonQueueObject(path);
 
-        ProducerEndpointImpl producerEndpoint = new ProducerEndpointImpl(path);
-
-        Thread thread = new Thread(producerEndpoint);
+        Thread thread = new Thread(internalQueueImplementation);
         thread.start();
         // Starts reading from directory and puts in the queue
 
         sb.service(
                 new GrpcServiceBuilder()
-                        .addService(producerEndpoint)
+                        .addService(new ProducerEndpointImpl())
                         .build()
         );
 
