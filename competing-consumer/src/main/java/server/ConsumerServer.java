@@ -23,7 +23,6 @@ public class ConsumerServer {
     public static void main(String[] args) throws InterruptedException {
     	
     	CommandLine commandLine = getCommandLineParser(args);
-    	String endpoint = commandLine.getOptionValue("e");
 
         log.info("Using {} threads to get files", idealNumberOfThreads);
 
@@ -32,7 +31,7 @@ public class ConsumerServer {
         ExecutorService executorService = Executors.newFixedThreadPool(idealNumberOfThreads);
 
         for(int i = 0; i < idealNumberOfThreads; i++) {
-            executorService.execute(new PerformRequestAndSaveFile(endpoint));
+            executorService.execute(new PerformRequestAndSaveFile(commandLine.getOptionValue("e")));
         }
 
         executorService.shutdown();

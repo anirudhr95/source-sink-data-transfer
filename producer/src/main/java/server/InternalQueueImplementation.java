@@ -9,40 +9,42 @@ import java.util.concurrent.ArrayBlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InternalQueueImplementation implements Runnable{
-	
+/**
+ * @author anirudhr Gives you a singleton class that maintains all files ina
+ *         queue.
+ *
+ */
+
+public class InternalQueueImplementation implements Runnable {
+
 	private static final Logger log = LoggerFactory.getLogger(InternalQueueImplementation.class);
-	
+
 	private Path path;
 	private static ArrayBlockingQueue<byte[]> arrayBlockingQueue;
-	
-	private static volatile InternalQueueImplementation internalQueueImplementation; 
-	
-	
+
+	private static volatile InternalQueueImplementation internalQueueImplementation;
+
 	public static InternalQueueImplementation getSingletonQueueObject(Path path) {
-		
-		if(internalQueueImplementation == null) {
-			
+
+		if (internalQueueImplementation == null) {
 			synchronized (InternalQueueImplementation.class) {
-				
-				if(internalQueueImplementation == null) {
+				if (internalQueueImplementation == null) {
 					log.info("Creating singleton of Queue object for first-time");
 					internalQueueImplementation = new InternalQueueImplementation(path);
+
 				}
-				
 			}
-			
-			
+
 		}
-		
+
 		return internalQueueImplementation;
 	}
-	
+
 	private InternalQueueImplementation(Path path) {
 		this.path = path;
 		arrayBlockingQueue = new ArrayBlockingQueue<byte[]>(this.getSafeSizeForQueue());
 	}
-	
+
 	@Override
 	public void run() {
 
@@ -55,6 +57,7 @@ public class InternalQueueImplementation implements Runnable{
 			for (Path path : stream) {
 				arrayBlockingQueue.put(Files.readAllBytes(path));
 			}
+			log.info("---- Completed writing all the files to internal queue ----");
 
 		} catch (Exception e) {
 			log.error("Error while trying to traverse directory - {}", this.path, e);
@@ -68,19 +71,19 @@ public class InternalQueueImplementation implements Runnable{
 		}
 
 	}
-	
-	public static  ArrayBlockingQueue<byte[]> getQueue() {
+
+	public static ArrayBlockingQueue<byte[]> getQueue() {
 		return arrayBlockingQueue;
 	}
-	
+
 	public static int getQueueSize() {
 		return arrayBlockingQueue.size();
 	}
-	
+
 	public static byte[] getFileAsBytesFromQueue() {
 		return arrayBlockingQueue.poll();
 	}
-	
+
 	private int getSafeSizeForQueue() {
 		/*
 		 * Maximum size of file I notice is 10KB Take the xmxx argument if any, and

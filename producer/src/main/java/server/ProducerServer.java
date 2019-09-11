@@ -19,36 +19,32 @@ import com.linecorp.armeria.server.grpc.GrpcServiceBuilder;
 import com.linecorp.armeria.server.docs.DocService;
 
 public class ProducerServer {
-	
-	
+
 	private static final Logger log = LoggerFactory.getLogger(ProducerServer.class);
 	
 
     public static void main(String args[]) {
     	
+    	// Parse CMD line arguments
     	CommandLine commandLine = getCommandLineParser(args);
-    	
-    	int portNumber = Integer.valueOf(commandLine.getOptionValue("p", "4242"));
-    	String directoryContainingFiles = commandLine.getOptionValue("s");
-    	
-    	Path path = Paths.get(directoryContainingFiles);
+
+    	Path path = Paths.get(commandLine.getOptionValue("s"));
   
-    	if(! path.toFile().exists() ) {
+    	if(isNotAValidPATH(path)) {
     		log.error("{} is not a valid/existing path for a FOLDER on this file-system, "
     				+ "Please re-try with a valid path", path);
+    		
+    		log.warn(" !!! EXITING !!! ");
     		System.exit(1);
     	}
     	
  
         ServerBuilder sb = new ServerBuilder();
-        sb.http(portNumber);          // Set port for Netty
-        
-        
-        InternalQueueImplementation internalQueueImplementation = InternalQueueImplementation.getSingletonQueueObject(path);
+        sb.http( Integer.valueOf( commandLine.getOptionValue("p", "4242")) );          // Set port for Netty
 
-        Thread thread = new Thread(internalQueueImplementation);
-        thread.start();
-        // Starts reading from directory and puts in the queue
+
+		startPuttingFilesInQueue(path);
+		// Starts reading from directory and puts in the queue (using a background thread)
 
         sb.service(
                 new GrpcServiceBuilder()
@@ -65,8 +61,19 @@ public class ProducerServer {
         server.start().join();
         // DUN DUN DUN!
     }
-    
-    private static CommandLine getCommandLineParser(String args[]) {
+
+	private static void startPuttingFilesInQueue(Path path) {
+		InternalQueueImplementation internalQueueImplementation = InternalQueueImplementation.getSingletonQueueObject(path);
+
+		Thread thread = new Thread(internalQueueImplementation);
+		thread.start();
+	}
+
+	private static boolean isNotAValidPATH(Path path) {
+		return ! path.toFile().exists();
+	}
+
+	private static CommandLine getCommandLineParser(String args[]) {
     	
     	Options options = new Options();
     	

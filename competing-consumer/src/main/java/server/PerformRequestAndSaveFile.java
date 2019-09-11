@@ -22,70 +22,75 @@ import io.grpc.stub.StreamObserver;
 
 public class PerformRequestAndSaveFile implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(PerformRequestAndSaveFile.class);
+	private static final Logger log = LoggerFactory.getLogger(PerformRequestAndSaveFile.class);
 
-    private GetMessageFromQueueGrpc.GetMessageFromQueueBlockingStub getMessageFromQueueStub;
+	private GetMessageFromQueueGrpc.GetMessageFromQueueBlockingStub getMessageFromQueueStub;
 
-    private RequestFromSink request;
+	private RequestFromSink request;
 
-    private StreamObserver<ResponseFromQueueSource> responseStream;
+	private StreamObserver<ResponseFromQueueSource> responseStream;
 
-    //This is an expensive object. Creating 1 for thread an at the beginning.
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private ListenableFuture<ResponseFromQueueSource> future;
-    private boolean isQueueEmpty;
+	// This is an expensive object. Creating 1 for thread an at the beginning.
+	private final ObjectMapper objectMapper = new ObjectMapper();
+	private ListenableFuture<ResponseFromQueueSource> future;
+	private boolean isQueueEmpty;
 
+	PerformRequestAndSaveFile(String endpointURL) {
 
-    PerformRequestAndSaveFile(String endpointURL) {
-    	
-    	this.getMessageFromQueueStub = Clients.newClient(
-                "gproto+http://" + endpointURL,
-                GetMessageFromQueueBlockingStub.class);
+		this.getMessageFromQueueStub = getClientForEndPoint(endpointURL);
 
-
-        this.request = RequestFromSink.newBuilder().build();
+		this.request = getRequestObject();
 //        this.responseStream = this.getStreamObserver();
-        isQueueEmpty = false;
+		isQueueEmpty = false;
 
-    }
+	}
 
+	private RequestFromSink getRequestObject() {
+		return RequestFromSink.newBuilder().build();
+	}
 
+	private GetMessageFromQueueBlockingStub getClientForEndPoint(String endpointURL) {
+		return Clients.newClient("gproto+http://" + endpointURL, GetMessageFromQueueBlockingStub.class);
+	}
 
-    @Override
-    public void run() {
+	@Override
+	public void run() {
 
-        while( !isQueueEmpty ) {
+		while (true) {
+			
+			Iterator<ResponseFromQueueSource> responseIterator = getIteratedResponseFromGRPCServer();
+			log.info("Got response - {}", responseIterator.hasNext());
 
-            Iterator<ResponseFromQueueSource> responseIterator = this.getMessageFromQueueStub.getItem(request);
+			while (responseIterator.hasNext()) {
 
-            while(responseIterator.hasNext()) {
+				ResponseFromQueueSource responseFromQueueSource = responseIterator.next();
+				List<ByteString> fileList = responseFromQueueSource.getFileList();
 
-                ResponseFromQueueSource responseFromQueueSource = responseIterator.next();
-                List<ByteString> fileList = responseFromQueueSource.getFileList();
-                
-                if(fileList == null || fileList.size() == 0) {
-                	isQueueEmpty = true;
-                	continue;
-                }
-                
-                for(ByteString file : fileList) {
-                    ResponseJsonPojo responseJsonPojo = null;
-                    try {
-                        responseJsonPojo = objectMapper.readValue( file.toStringUtf8(), ResponseJsonPojo.class );
-                        objectMapper.writeValue(new File(responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
-                    } catch (Exception e) {
-                        log.error("Error while parsing JSON / Writing to file for JSON - ", file.toStringUtf8(), e);
-                    }
+				if (fileList == null || fileList.size() == 0) {
+					isQueueEmpty = true;
+					continue;
+				}
 
-                }
+				for (ByteString file : fileList) {
+					ResponseJsonPojo responseJsonPojo = null;
+					try {
+						responseJsonPojo = objectMapper.readValue(file.toStringUtf8(), ResponseJsonPojo.class);
+						objectMapper.writeValue(new File(responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
+					} catch (Exception e) {
+						log.error("Error while parsing JSON / Writing to file for JSON - ", file.toStringUtf8(), e);
+					}
 
-            }
+				}
 
+			}
 
-        }
-    	
+		}
 
-    }
+	}
+
+	private Iterator<ResponseFromQueueSource> getIteratedResponseFromGRPCServer() {
+		return this.getMessageFromQueueStub.getItem(request);
+	}
 
 //    private StreamObserver<ResponseFromQueueSource> getStreamObserver() {
 //        return new StreamObserver<ResponseFromQueueSource>() {
