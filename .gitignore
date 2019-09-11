@@ -95,7 +95,17 @@ fabric.properties
 # Sensitive or high-churn files
 
 # Gradle
-
+build
+.idea
+.DS_Store
+out
+.classpath
+.project
+.settings/
+bin/
+.gradle/*
+producer/.gradle/*
+competing-consumer/.gradle/*
 # Gradle and Maven with auto-import
 # When using Gradle or Maven with auto-import, you should exclude module files,
 # since they will be recreated, and may cause churn.  Uncomment if using
