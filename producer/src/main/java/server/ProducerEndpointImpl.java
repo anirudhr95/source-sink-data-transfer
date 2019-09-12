@@ -1,8 +1,8 @@
 package server;
 
 import com.google.protobuf.ByteString;
-import com.source.queue.ResponseFromQueueSource;
 import com.source.queue.GetMessageFromQueueGrpc;
+import com.source.queue.ResponseFromQueueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +20,8 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
     private Path path;
     private ArrayBlockingQueue<byte[]> arrayBlockingQueue;
 
-    private static final int idealBatchSize = 5;        // Try batching and send files
+    protected static final int idealBatchSize = 30;        // Try batching and send files
+    protected static int lastBatchSize = 0;        // Try batching and send files
 
     ProducerEndpointImpl(Path path) {
         this.path = path;
@@ -62,11 +63,15 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
 
         ResponseFromQueueSource.Builder responseBuilderObj = ResponseFromQueueSource.newBuilder();
 
-        for(int i = 0 ; i < this.idealBatchSize; i++) {
+        for(int i = 0 ; i < idealBatchSize; i++) {
             byte[] file = this.arrayBlockingQueue.poll();
 
-            if(file == null)
+            if (file != null) {
+                lastBatchSize = file.length;
+            } else {
+
                 break;
+            }
 
             responseBuilderObj.addFile(ByteString.copyFrom(file));
         }
@@ -95,5 +100,6 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
         log.info("Setting the maximum ideal queue size to - {}", safeQueueSize);
         return safeQueueSize;
     }
+
 
 }
