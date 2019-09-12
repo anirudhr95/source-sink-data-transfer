@@ -54,6 +54,24 @@
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE-ROLLING" />
     </logger>
+    
+    <logger name="org.eclipse.jetty" level="OFF" additivity="false">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE-ROLLING" />
+    </logger>
+    
+        <logger name="o.e.jetty" level="OFF" additivity="false">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE-ROLLING" />
+    	</logger>
+    
+
+    
+      <logger name="spark.*" level="OFF" additivity="false">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE-ROLLING" />
+    </logger>
+    
 
     <root level="INFO">
         <appender-ref ref="ASYNC" />
