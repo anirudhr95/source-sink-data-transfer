@@ -27,10 +27,11 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
             	break;
             }
                 
-            lastBatchSize = file.length;
 
             responseBuilderObj.addFile(ByteString.copyFrom(file));
         }
+        
+        lastBatchSize = responseBuilderObj.getFileCount();
 
         ResponseFromQueueSource response = responseBuilderObj.build();
 
