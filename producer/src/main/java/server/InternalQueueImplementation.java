@@ -49,6 +49,7 @@ public class InternalQueueImplementation implements Runnable {
     public void run() {
 
         DirectoryStream<Path> stream = null;
+  
         try {
             stream = Files.newDirectoryStream(this.path); // TODO: Parallelize this
 
