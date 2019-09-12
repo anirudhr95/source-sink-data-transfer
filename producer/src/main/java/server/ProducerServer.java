@@ -30,7 +30,7 @@ public class ProducerServer {
 	
 	private static final Logger log = LoggerFactory.getLogger(ProducerServer.class);
 
-    private static CollectorRegistry collectorRegistry = new CollectorRegistry();
+    private static final CollectorRegistry collectorRegistry = new CollectorRegistry();
 
     public static void main(String args[]) {
     	
@@ -93,6 +93,34 @@ public class ProducerServer {
 
     }
 
+    private static CommandLine getCommandLineParser(String args[]) {
+
+        Options options = new Options();
+
+        Option portNumber = new Option("p","port", true, "port number binding for server");
+        portNumber.setRequired(false);
+        options.addOption(portNumber);
+
+        Option sourceFolder = new Option("s", "source", true, "source folder containing files");
+        sourceFolder.setRequired(true);
+        options.addOption(sourceFolder);
+
+        CommandLineParser parser = new DefaultParser();
+        HelpFormatter formatter = new HelpFormatter();
+        CommandLine commandLine = null;
+
+        try {
+            commandLine = parser.parse(options, args);
+        } catch(ParseException pe) {
+            log.error("Error parsing command line arguments - ", pe);
+            formatter.printHelp("utility-name", options);
+            System.exit(1);
+        }
+
+        return commandLine;
+
+    }
+
     private static Collector.MetricFamilySamples findRecordedMetricOrThrow(String name) {
         return RegistryHelper.findRecordedMetricOrThrow(name, collectorRegistry);
     }
@@ -131,34 +159,5 @@ public class ProducerServer {
         }
 
     }
-    
-    private static CommandLine getCommandLineParser(String args[]) {
-    	
-    	Options options = new Options();
-    	
-    	Option portNumber = new Option("p","port", true, "port number binding for server");
-    	portNumber.setRequired(false);
-    	options.addOption(portNumber);
-    	
-    	Option sourceFolder = new Option("s", "source", true, "source folder containing files");
-    	sourceFolder.setRequired(true);
-    	options.addOption(sourceFolder);
-    	
-    	CommandLineParser parser = new DefaultParser();
-    	HelpFormatter formatter = new HelpFormatter();
-    	CommandLine commandLine = null;
-    	
-    	try {
-    		commandLine = parser.parse(options, args);
-    	} catch(ParseException pe) {
-    		log.error("Error parsing command line arguments - ", pe);
-    		formatter.printHelp("utility-name", options);
-    		System.exit(1);
-    	}
-    	
-    	return commandLine;
-    	
-    }
-
 
 }
