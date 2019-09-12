@@ -1,7 +1,6 @@
 package server;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -14,7 +13,6 @@ import com.google.protobuf.ByteString;
 import com.linecorp.armeria.client.Clients;
 import com.sink.queue.GetMessageFromQueueGrpc;
 import com.sink.queue.GetMessageFromQueueGrpc.GetMessageFromQueueBlockingStub;
-import com.sink.queue.GetMessageFromQueueGrpc.GetMessageFromQueueStub;
 import com.sink.queue.RequestFromSink;
 import com.sink.queue.ResponseFromQueueSource;
 
@@ -56,30 +54,26 @@ public class PerformRequestAndSaveFile implements Runnable {
 	@Override
 	public void run() {
 
-		while (true) {
-			
-			Iterator<ResponseFromQueueSource> responseIterator = getIteratedResponseFromGRPCServer();
-			log.info("Got response - {}", responseIterator.hasNext());
+		Iterator<ResponseFromQueueSource> responseIterator = getIteratedResponseFromGRPCServer();
 
-			while (responseIterator.hasNext()) {
+		while (responseIterator.hasNext()) {
 
-				ResponseFromQueueSource responseFromQueueSource = responseIterator.next();
-				List<ByteString> fileList = responseFromQueueSource.getFileList();
+			ResponseFromQueueSource responseFromQueueSource = responseIterator.next();
+			log.info("Got respones - {}", responseFromQueueSource);
+			List<ByteString> fileList = responseFromQueueSource.getFileList();
 
-				if (fileList == null || fileList.size() == 0) {
-					isQueueEmpty = true;
-					continue;
-				}
+			if (fileList == null || fileList.size() == 0) {
+				isQueueEmpty = true;
+				continue;
+			}
 
-				for (ByteString file : fileList) {
-					ResponseJsonPojo responseJsonPojo = null;
-					try {
-						responseJsonPojo = objectMapper.readValue(file.toStringUtf8(), ResponseJsonPojo.class);
-						objectMapper.writeValue(new File(responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
-					} catch (Exception e) {
-						log.error("Error while parsing JSON / Writing to file for JSON - ", file.toStringUtf8(), e);
-					}
-
+			for (ByteString file : fileList) {
+				ResponseJsonPojo responseJsonPojo = null;
+				try {
+					responseJsonPojo = objectMapper.readValue(file.toStringUtf8(), ResponseJsonPojo.class);
+					objectMapper.writeValue(new File(responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
+				} catch (Exception e) {
+					log.error("Error while parsing JSON / Writing to file for JSON - ", file.toStringUtf8(), e);
 				}
 
 			}
