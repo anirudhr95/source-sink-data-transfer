@@ -1,8 +1,18 @@
 package server;
 
-import static server.ProducerEndpointImpl.idealBatchSize;
-import static server.ProducerEndpointImpl.lastBatchSize;
-import static spark.Spark.get;
+import com.google.gson.Gson;
+import com.linecorp.armeria.server.Server;
+import com.linecorp.armeria.server.ServerBuilder;
+import com.linecorp.armeria.server.docs.DocService;
+import com.linecorp.armeria.server.grpc.GrpcServiceBuilder;
+import io.grpc.ServerInterceptors;
+import io.prometheus.client.Collector;
+import io.prometheus.client.CollectorRegistry;
+import me.dinowernli.grpc.prometheus.Configuration;
+import me.dinowernli.grpc.prometheus.MonitoringServerInterceptor;
+import org.apache.commons.cli.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -11,24 +21,9 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.gson.Gson;
-import com.linecorp.armeria.server.Server;
-import com.linecorp.armeria.server.ServerBuilder;
-import com.linecorp.armeria.server.docs.DocService;
-import com.linecorp.armeria.server.grpc.GrpcServiceBuilder;
-
-import io.prometheus.client.Collector;
-import io.prometheus.client.CollectorRegistry;
+import static server.ProducerEndpointImpl.idealBatchSize;
+import static server.ProducerEndpointImpl.lastBatchSize;
+import static spark.Spark.get;
 
 
 public class ProducerServer {
@@ -54,6 +49,9 @@ public class ProducerServer {
         }
 
 
+        MonitoringServerInterceptor monitoringInterceptor =
+                MonitoringServerInterceptor.create(Configuration.cheapMetricsOnly().withCollectorRegistry(collectorRegistry));
+
         ServerBuilder sb = new ServerBuilder();
         sb.http( Integer.valueOf( commandLine.getOptionValue("p", "4242")) );          // Set port for Netty
 
@@ -63,7 +61,7 @@ public class ProducerServer {
 
         sb.service(
                 new GrpcServiceBuilder()
-                        .addService(new ProducerEndpointImpl())
+                        .addService(ServerInterceptors.intercept(new ProducerEndpointImpl().bindService(), monitoringInterceptor))
                         .build()
         );
 
@@ -78,6 +76,7 @@ public class ProducerServer {
         
         get("/metrics", (req, res) -> {
             res.type("application/json");
+
 
             Enumeration<Collector.MetricFamilySamples> samples = findAllRecordedMetricOrThrow();
             ArrayList<Collector.MetricFamilySamples> familySamplesArrayList = Collections.list(samples);
