@@ -20,7 +20,7 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
     private Path path;
     private ArrayBlockingQueue<byte[]> arrayBlockingQueue;
 
-    protected static final int idealBatchSize = 5;        // Try batching and send files
+    protected static final int idealBatchSize = 30;        // Try batching and send files
     protected static int lastBatchSize = 0;        // Try batching and send files
 
     ProducerEndpointImpl(Path path) {
