@@ -58,6 +58,7 @@ public class PerformRequestAndSaveFile implements Runnable {
                     if(fileList == null || fileList.size() == 0) {
                         log.warn("Cannot fetch anymore items - Queue is Empty");
                         isQueueEmpty = true;
+                        log.warn("Killing thread - {} due to inactivity", Thread.currentThread());
                     }
 
 /*
