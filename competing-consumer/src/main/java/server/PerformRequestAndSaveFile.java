@@ -80,7 +80,7 @@ public class PerformRequestAndSaveFile implements Runnable {
 
                         try {
                             ResponseJsonPojo responseJsonPojo = objectMapper.readValue(byteString.toStringUtf8(), ResponseJsonPojo.class);
-                            objectMapper.writeValue(new File(responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
+                            objectMapper.writeValue(new File("~/data/"+responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
                         } catch (Exception e) {
                             log.error("Error while parsing JSON / Writing to file for JSON - ", byteString.toStringUtf8(), e);
                         }
