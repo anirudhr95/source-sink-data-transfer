@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class DirectorySpliterator implements Spliterator<Path> {
+
     Iterator<Path> iterator;
     long est;
 
@@ -63,7 +64,7 @@ public class DirectorySpliterator implements Spliterator<Path> {
 
     public static Stream<Path> list(Path parent) throws IOException {
         DirectoryStream<Path> ds = Files.newDirectoryStream(parent);
-        int splitSize = Runtime.getRuntime().availableProcessors() * 20;
+        int splitSize = 15;
         DirectorySpliterator spltr = new DirectorySpliterator(ds.iterator(), splitSize);
         return StreamSupport.stream(spltr, false).onClose(() -> {
             try {

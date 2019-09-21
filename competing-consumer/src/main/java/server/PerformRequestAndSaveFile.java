@@ -29,9 +29,9 @@ public class PerformRequestAndSaveFile implements Runnable {
     //This is an expensive object. Creating 1 for thread an at the beginning.
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    private ListenableFuture<ResponseFromQueueSource> future;
-    private boolean isQueueEmpty;
+    private int numberOfEmptyResponse;
 
+    private ListenableFuture<ResponseFromQueueSource> future;
 
     PerformRequestAndSaveFile(String endpointURL) {
         this.sinkResponseAsyncStub = Clients.newClient(
@@ -39,14 +39,14 @@ public class PerformRequestAndSaveFile implements Runnable {
                 GetMessageFromQueueGrpc.GetMessageFromQueueFutureStub.class);
 
         this.request = RequestFromSink.newBuilder().build();
-        isQueueEmpty = false;
+        this.numberOfEmptyResponse = 0;
     }
 
 
     @Override
     public void run() {
 
-        while (!isQueueEmpty) {
+        while (numberOfEmptyResponse <= 5) {
 
             this.future = sinkResponseAsyncStub.getItem(request);
 
@@ -56,8 +56,8 @@ public class PerformRequestAndSaveFile implements Runnable {
                     List<ByteString> fileList = result.getFileList();
 
                     if(fileList == null || fileList.size() == 0) {
-                        log.warn("Cannot fetch anymore items - Queue is Empty");
-                        isQueueEmpty = true;
+                        log.warn("Cannot fetch anymore items - Queue is Empty - #{}", numberOfEmptyResponse);
+                        numberOfEmptyResponse++;
                     }
 
 /*
@@ -85,6 +85,17 @@ public class PerformRequestAndSaveFile implements Runnable {
                             }
 
                         }
+
+//                        fileList.parallelStream().forEach(byteString -> {
+//                            ResponseJsonPojo responseJsonPojo = null;
+//                            try {
+//                                responseJsonPojo = objectMapper.readValue(byteString.toStringUtf8(), ResponseJsonPojo.class);
+//                                objectMapper.writeValue(new File(responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
+//                            } catch (Exception e) {
+//                                log.error("Error while parsing JSON / Writing to file for JSON - ", byteString.toStringUtf8(), e);
+//                            }
+//
+//                        });
                     }
                 }
 
@@ -102,6 +113,9 @@ public class PerformRequestAndSaveFile implements Runnable {
                 log.error("Error executing future.get() for GRPC endpoint, Reason: ", e);
             }
         }
+
+        if(numberOfEmptyResponse == 5)
+            log.warn("Killing thread - {} due to inactivity", Thread.currentThread());
 
     }
 }
