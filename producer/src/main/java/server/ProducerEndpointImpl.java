@@ -39,6 +39,7 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
 			ResponseFromQueueSource response = responseBuilderObj.build();
 
 			responseObserver.onNext(response);
+//			log.info("Sending {} files @ {}", lastBatchSize, System.currentTimeMillis());
 		}
 
 		responseObserver.onCompleted();

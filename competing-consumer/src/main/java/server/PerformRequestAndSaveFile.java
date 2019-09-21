@@ -54,6 +54,7 @@ public class PerformRequestAndSaveFile implements Runnable {
 		while (true) {
 
 			responseIterator = getMessageFromQueueBlockingStub.getItem(request);
+//			log.info("Received - {} @ {}", responseIterator, System.currentTimeMillis());
 
 			while (responseIterator.hasNext()) {
 
