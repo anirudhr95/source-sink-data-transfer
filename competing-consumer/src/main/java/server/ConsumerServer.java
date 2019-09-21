@@ -17,25 +17,21 @@ public class ConsumerServer {
 
     private static final Logger log = LoggerFactory.getLogger(ConsumerServer.class);
 
-    /*
-        If I use availableProcessors() I don't need to worry if the processors are hyper-threaded
-        as it returns the right number.
-     */
+    // If I use availableProcessors() I don't need to worry if the processors are hyper-threaded
     private static final int idealNumberOfThreads = (Runtime.getRuntime().availableProcessors() + 1);
 
     public static void main(String[] args) {
     	
     	CommandLine commandLine = getCommandLineParser(args);
-    	String endpoint = commandLine.getOptionValue("e");
 
-        log.info("Crawling parallely using {} threads", idealNumberOfThreads);
+        log.info("Using {} threads to get files", idealNumberOfThreads);
 
         long startTime = System.nanoTime();     // »-(¯`·.·´¯)-> PRECISION BOIS <-(¯`·.·´¯)-«
 
         ExecutorService executorService = Executors.newFixedThreadPool(idealNumberOfThreads);
 
         for(int i = 0; i < idealNumberOfThreads; i++) {
-            executorService.execute(new PerformRequestAndSaveFile(endpoint));
+            executorService.execute(new PerformRequestAndSaveFile(commandLine.getOptionValue("e")));
         }
 
         executorService.shutdown();
@@ -50,7 +46,6 @@ public class ConsumerServer {
     private static CommandLine getCommandLineParser(String args[]) {
     	
     	Options options = new Options();
-    	
     	
     	Option producerEndpoint = new Option("e", "endpoint", true, "Producer endpoint URL");
     	producerEndpoint.setRequired(true);
@@ -69,7 +64,6 @@ public class ConsumerServer {
     	}
     	
     	return commandLine;
-    	
     }
 
 }

@@ -9,36 +9,35 @@ import com.source.queue.ResponseFromQueueSource;
 
 public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFromQueueImplBase {
 
-    private static final Logger log = LoggerFactory.getLogger(ProducerEndpointImpl.class);
+	private static final Logger log = LoggerFactory.getLogger(ProducerEndpointImpl.class);
 
-    protected static final int idealBatchSize = 10;        // Try batching and send files
-    protected static int lastBatchSize = 0;        // Try batching and send files
+	private static final int idealBatchSize = 10; // Try batching and send files
 
-    @Override
-    public void getItem(com.source.queue.RequestFromSink request,
-                        io.grpc.stub.StreamObserver<com.source.queue.ResponseFromQueueSource> responseObserver) {
+	@Override
+	public void getItem(com.source.queue.RequestFromSink request,
+			io.grpc.stub.StreamObserver<com.source.queue.ResponseFromQueueSource> responseObserver) {
 
-        ResponseFromQueueSource.Builder responseBuilderObj = ResponseFromQueueSource.newBuilder();
+		ResponseFromQueueSource.Builder responseBuilderObj = ResponseFromQueueSource.newBuilder();
 
-        for(int i = 0 ; i < idealBatchSize; i++) {
-            byte[] file = InternalQueueImplementation.getFileAsBytesFromQueue();
+		while (InternalQueueImplementation.getQueueSize() > 0) {
 
-            if (file == null) {
-            	break;
-            }
-                
+			responseBuilderObj.clearFile(); // Makes sure you avoid overflow
 
-            responseBuilderObj.addFile(ByteString.copyFrom(file));
-        }
-        
-        lastBatchSize = responseBuilderObj.getFileCount();
+			for (int i = 0; i < this.idealBatchSize; i++) {
+				byte[] file = InternalQueueImplementation.getFileAsBytesFromQueue();
 
-        ResponseFromQueueSource response = responseBuilderObj.build();
+				if (file == null || file.length == 0)
+					continue;
 
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
-    }
+				responseBuilderObj.addFile(ByteString.copyFrom(file));
+			}
 
+			ResponseFromQueueSource response = responseBuilderObj.build();
 
+			responseObserver.onNext(response);
+		}
+
+		responseObserver.onCompleted();
+	}
 
 }

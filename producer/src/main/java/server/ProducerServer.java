@@ -25,33 +25,31 @@ import static server.ProducerEndpointImpl.idealBatchSize;
 import static server.ProducerEndpointImpl.lastBatchSize;
 import static spark.Spark.get;
 
-
 public class ProducerServer {
 
-    private static final Logger log = LoggerFactory.getLogger(ProducerServer.class);
-    
-    private static final CollectorRegistry collectorRegistry = new CollectorRegistry();
+	private static final Logger log = LoggerFactory.getLogger(ProducerServer.class);
 
+	private static final CollectorRegistry collectorRegistry = new CollectorRegistry();
 
-    public static void main(String args[]) {
+	public static void main(String args[]) {
+    	
+    	// Parse CMD line arguments
+    	CommandLine commandLine = getCommandLineParser(args);
 
-        // Parse CMD line arguments
-        CommandLine commandLine = getCommandLineParser(args);
-
-        Path path = Paths.get(commandLine.getOptionValue("s"));
-
-        if(isNotAValidPATH(path)) {
-            log.error("{} is not a valid/existing path for a FOLDER on this file-system, "
-                    + "Please re-try with a valid path", path);
-
-            log.warn(" !!! EXITING !!! ");
-            System.exit(1);
-        }
-
-
+    	Path path = Paths.get(commandLine.getOptionValue("s"));
+  
+    	if(isNotAValidPATH(path)) {
+    		log.error("{} is not a valid/existing path for a FOLDER on this file-system, "
+    				+ "Please re-try with a valid path", path);
+    		
+    		log.warn(" !!! EXITING !!! ");
+    		System.exit(1);
+    	}
+    	
         MonitoringServerInterceptor monitoringInterceptor =
                 MonitoringServerInterceptor.create(Configuration.cheapMetricsOnly().withCollectorRegistry(collectorRegistry));
-
+    	
+ 
         ServerBuilder sb = new ServerBuilder();
         sb.http( Integer.valueOf( commandLine.getOptionValue("p", "4242")) );          // Set port for Netty
 
@@ -83,85 +81,85 @@ public class ProducerServer {
 
             return new Gson().toJsonTree(setMetricList(familySamplesArrayList));
         });
-    }
-    
+
 	private static void startPuttingFilesInQueue(Path path) {
-		InternalQueueImplementation internalQueueImplementation = InternalQueueImplementation.getSingletonQueueObject(path);
+		InternalQueueImplementation internalQueueImplementation = InternalQueueImplementation
+				.getSingletonQueueObject(path);
 
 		Thread thread = new Thread(internalQueueImplementation);
 		thread.start();
 	}
 
 	private static boolean isNotAValidPATH(Path path) {
-		return ! path.toFile().exists();
+		return !path.toFile().exists();
 	}
 
-    private static CommandLine getCommandLineParser(String args[]) {
 
-        Options options = new Options();
+	private static CommandLine getCommandLineParser(String args[]) {
 
-        Option portNumber = new Option("p","port", true, "port number binding for server");
-        portNumber.setRequired(false);
-        options.addOption(portNumber);
+		Options options = new Options();
 
-        Option sourceFolder = new Option("s", "source", true, "source folder containing files");
-        sourceFolder.setRequired(true);
-        options.addOption(sourceFolder);
+		Option portNumber = new Option("p", "port", true, "port number binding for server");
+		portNumber.setRequired(false);
+		options.addOption(portNumber);
 
-        CommandLineParser parser = new DefaultParser();
-        HelpFormatter formatter = new HelpFormatter();
-        CommandLine commandLine = null;
+		Option sourceFolder = new Option("s", "source", true, "source folder containing files");
+		sourceFolder.setRequired(true);
+		options.addOption(sourceFolder);
 
-        try {
-            commandLine = parser.parse(options, args);
-        } catch(ParseException pe) {
-            log.error("Error parsing command line arguments - ", pe);
-            formatter.printHelp("utility-name", options);
-            System.exit(1);
-        }
+		CommandLineParser parser = new DefaultParser();
+		HelpFormatter formatter = new HelpFormatter();
+		CommandLine commandLine = null;
 
-        return commandLine;
+		try {
+			commandLine = parser.parse(options, args);
+		} catch (ParseException pe) {
+			log.error("Error parsing command line arguments - ", pe);
+			formatter.printHelp("utility-name", options);
+			System.exit(1);
+		}
 
-    }
+		return commandLine;
 
-    private static Collector.MetricFamilySamples findRecordedMetricOrThrow(String name) {
-        return RegistryHelper.findRecordedMetricOrThrow(name, collectorRegistry);
-    }
+	}
 
-    static Enumeration<Collector.MetricFamilySamples> findAllRecordedMetricOrThrow() {
-        return RegistryHelper.findRecordedMetric(collectorRegistry);
-    }
+	private static Collector.MetricFamilySamples findRecordedMetricOrThrow(String name) {
+		return RegistryHelper.findRecordedMetricOrThrow(name, collectorRegistry);
+	}
 
-    public static List<Metric> setMetricList(List<Collector.MetricFamilySamples> sampleMetrics) {
-        List<Metric> metricList = new ArrayList<>();
+	static Enumeration<Collector.MetricFamilySamples> findAllRecordedMetricOrThrow() {
+		return RegistryHelper.findRecordedMetric(collectorRegistry);
+	}
 
-        for(Collector.MetricFamilySamples metricFamilySamples : sampleMetrics){
+	public static List<Metric> setMetricList(List<Collector.MetricFamilySamples> sampleMetrics) {
+		List<Metric> metricList = new ArrayList<>();
 
-            double sampleSize = 0;
+		for (Collector.MetricFamilySamples metricFamilySamples : sampleMetrics) {
 
-            if( metricFamilySamples.samples.size()>0 )
-                 sampleSize = metricFamilySamples.samples.get(0).value * idealBatchSize - (idealBatchSize - lastBatchSize);
+			double sampleSize = 0;
 
-            Metric metric = new Metric(metricFamilySamples.name, metricFamilySamples.type.toString(), sampleSize);
-            metricList.add(metric);
+			if (metricFamilySamples.samples.size() > 0)
+				sampleSize = metricFamilySamples.samples.get(0).value * idealBatchSize
+						- (idealBatchSize - lastBatchSize);
 
-        }
-        return metricList;
-    }
+			Metric metric = new Metric(metricFamilySamples.name, metricFamilySamples.type.toString(), sampleSize);
+			metricList.add(metric);
 
+		}
+		return metricList;
+	}
 
-    public static class Metric{
-        String name;
-        String type;
-        double value;
+	public static class Metric {
+		String name;
+		String type;
+		double value;
 
-        public Metric(String name, String type, double value) {
+		public Metric(String name, String type, double value) {
             this.name = name;
             this.type = type;
             this.value = value;
         }
 
-    }
-
+	}
 
 }
