@@ -1,10 +1,5 @@
 package server;
 
-import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -53,7 +48,7 @@ public class InternalQueueImplementation implements Runnable {
 	public void run() {
 
 		try {
-//        	
+
 			DirectorySpliterator.list(this.path).parallel().forEach(new Consumer<Path>() {
 
 				public void accept(Path path) {

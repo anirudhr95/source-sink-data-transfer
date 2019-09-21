@@ -24,9 +24,9 @@ public class ConsumerServer {
     	
     	CommandLine commandLine = getCommandLineParser(args);
 
-        log.info("Using {} threads to get files", idealNumberOfThreads);
+//        log.info("Using {} threads to get files", idealNumberOfThreads);
 
-        long startTime = System.nanoTime();     // »-(¯`·.·´¯)-> PRECISION BOIS <-(¯`·.·´¯)-«
+//        long startTime = System.nanoTime();     // »-(¯`·.·´¯)-> PRECISION BOIS <-(¯`·.·´¯)-«
 
         ExecutorService executorService = Executors.newFixedThreadPool(idealNumberOfThreads);
 
@@ -40,7 +40,7 @@ public class ConsumerServer {
 
         }
 
-       log.info("Total time taken - " + (System.nanoTime() - startTime) + " ns");
+//       log.info("Total time taken - " + (System.nanoTime() - startTime) + " ns");
     }
     
     private static CommandLine getCommandLineParser(String args[]) {

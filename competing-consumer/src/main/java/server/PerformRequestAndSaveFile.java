@@ -42,12 +42,14 @@ public class PerformRequestAndSaveFile implements Runnable {
 		managedChannel = ManagedChannelBuilder.forTarget(endpointURL).usePlaintext().build();
 		this.getMessageFromQueueBlockingStub = GetMessageFromQueueGrpc.newBlockingStub(managedChannel);
 		this.request = RequestFromSink.newBuilder().build();
+		
 	}
 
 	@Override
 	public void run() {
 
 		Iterator<ResponseFromQueueSource> responseIterator;
+		// Try and use ExecutorServiceCompletion and parallelize this
 
 		while (true) {
 
@@ -58,40 +60,30 @@ public class PerformRequestAndSaveFile implements Runnable {
 				ResponseFromQueueSource responseFromQueueSource = responseIterator.next();
 				List<ByteString> fileList = responseFromQueueSource.getFileList();
 
-				for (ByteString byteString : fileList) {
+//				for (ByteString byteString : fileList) {
+//
+//					try {
+//						ResponseJsonPojo responseJsonPojo = objectMapper.readValue(byteString.toStringUtf8(),
+//								ResponseJsonPojo.class);
+//						objectMapper.writeValue(new File(responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
+//					} catch (Exception e) {
+//						log.error("Error while parsing JSON / Writing to file for JSON - ", byteString.toStringUtf8(),
+//								e);
+//					}
+//				}
+				
+              fileList.parallelStream().forEach(byteString -> {
+              ResponseJsonPojo responseJsonPojo = null;
+              try {
+                  responseJsonPojo = objectMapper.readValue(byteString.toStringUtf8(), ResponseJsonPojo.class);
+                  objectMapper.writeValue(new File(responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
+              } catch (Exception e) {
+                  log.error("Error while parsing JSON / Writing to file for JSON - ", byteString.toStringUtf8(), e);
+              }
 
-					try {
-						ResponseJsonPojo responseJsonPojo = objectMapper.readValue(byteString.toStringUtf8(),
-								ResponseJsonPojo.class);
-						objectMapper.writeValue(new File(responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
-					} catch (Exception e) {
-						log.error("Error while parsing JSON / Writing to file for JSON - ", byteString.toStringUtf8(),
-								e);
-					}
-				}
+          });
 
 			}
-//                        fileList.parallelStream().forEach(byteString -> {
-//                            ResponseJsonPojo responseJsonPojo = null;
-//                            try {
-//                                responseJsonPojo = objectMapper.readValue(byteString.toStringUtf8(), ResponseJsonPojo.class);
-//                                objectMapper.writeValue(new File(responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
-//                            } catch (Exception e) {
-//                                log.error("Error while parsing JSON / Writing to file for JSON - ", byteString.toStringUtf8(), e);
-//                            }
-//
-//                        });
-
-//                        fileList.parallelStream().forEach(byteString -> {
-//                            ResponseJsonPojo responseJsonPojo = null;
-//                            try {
-//                                responseJsonPojo = objectMapper.readValue(byteString.toStringUtf8(), ResponseJsonPojo.class);
-//                                objectMapper.writeValue(new File(responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
-//                            } catch (Exception e) {
-//                                log.error("Error while parsing JSON / Writing to file for JSON - ", byteString.toStringUtf8(), e);
-//                            }
-//
-//                        });
 		}
 	}
 

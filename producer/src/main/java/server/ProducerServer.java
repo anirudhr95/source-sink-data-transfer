@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import static server.ProducerEndpointImpl.idealBatchSize;
+import static server.ProducerEndpointImpl.lastBatchSize;
 
 import static server.ProducerEndpointImpl.idealBatchSize;
 import static server.ProducerEndpointImpl.lastBatchSize;
@@ -32,59 +34,57 @@ public class ProducerServer {
 	private static final CollectorRegistry collectorRegistry = new CollectorRegistry();
 
 	public static void main(String args[]) {
-    	
-    	// Parse CMD line arguments
-    	CommandLine commandLine = getCommandLineParser(args);
 
-    	Path path = Paths.get(commandLine.getOptionValue("s"));
-  
-    	if(isNotAValidPATH(path)) {
-    		log.error("{} is not a valid/existing path for a FOLDER on this file-system, "
-    				+ "Please re-try with a valid path", path);
-    		
-    		log.warn(" !!! EXITING !!! ");
-    		System.exit(1);
-    	}
-    	
-        MonitoringServerInterceptor monitoringInterceptor =
-                MonitoringServerInterceptor.create(Configuration.cheapMetricsOnly().withCollectorRegistry(collectorRegistry));
-    	
- 
-        ServerBuilder sb = new ServerBuilder();
-        sb.http( Integer.valueOf( commandLine.getOptionValue("p", "4242")) );          // Set port for Netty
+		// Parse CMD line arguments
+		CommandLine commandLine = getCommandLineParser(args);
 
+		Path path = Paths.get(commandLine.getOptionValue("s"));
 
-        startPuttingFilesInQueue(path);
-        // Starts reading from directory and puts in the queue (using a background thread)
+		if (isNotAValidPATH(path)) {
+			log.error("{} is not a valid/existing path for a FOLDER on this file-system, "
+					+ "Please re-try with a valid path", path);
 
-        sb.service(
-                new GrpcServiceBuilder()
-                        .addService(ServerInterceptors.intercept(new ProducerEndpointImpl().bindService(), monitoringInterceptor))
-                        .build()
-        );
+			log.warn(" !!! EXITING !!! ");
+			System.exit(1);
+		}
 
-        sb.serviceUnder("/docs", new DocService());
-        /* Docservice API endpoint
-            Also acts like postman (But for GRPC)
-        */
+		MonitoringServerInterceptor monitoringInterceptor = MonitoringServerInterceptor
+				.create(Configuration.cheapMetricsOnly().withCollectorRegistry(collectorRegistry));
 
-        Server server = sb.build();
-        server.start().join();
-        // DUN DUN DUN!
-        
-        get("/metrics", (req, res) -> {
-            res.type("application/json");
+		ServerBuilder sb = new ServerBuilder();
+		sb.http(Integer.valueOf(commandLine.getOptionValue("p", "4242"))); // Set port for Netty
 
+		startPuttingFilesInQueue(path);
+		// Starts reading from directory and puts in the queue (using a background
+		// thread)
 
-            Enumeration<Collector.MetricFamilySamples> samples = findAllRecordedMetricOrThrow();
-            ArrayList<Collector.MetricFamilySamples> familySamplesArrayList = Collections.list(samples);
+		sb.service(new GrpcServiceBuilder()
+				.addService(
+						ServerInterceptors.intercept(new ProducerEndpointImpl().bindService(), monitoringInterceptor))
+				.build());
 
-            return new Gson().toJsonTree(setMetricList(familySamplesArrayList));
-        });
+		sb.serviceUnder("/docs", new DocService());
+		/*
+		 * Docservice API endpoint Also acts like postman (But for GRPC)
+		 */
+
+		Server server = sb.build();
+		server.start().join();
+		// DUN DUN DUN!
+
+		get("/metrics", (req, res) -> {
+			res.type("application/json");
+
+			Enumeration<Collector.MetricFamilySamples> samples = findAllRecordedMetricOrThrow();
+			ArrayList<Collector.MetricFamilySamples> familySamplesArrayList = Collections.list(samples);
+
+			return new Gson().toJsonTree(setMetricList(familySamplesArrayList));
+		});
+	}
 
 	private static void startPuttingFilesInQueue(Path path) {
 		InternalQueueImplementation internalQueueImplementation = InternalQueueImplementation
-				.getSingletonQueueObject(path);
+																	.getSingletonQueueObject(path);
 
 		Thread thread = new Thread(internalQueueImplementation);
 		thread.start();
@@ -93,7 +93,6 @@ public class ProducerServer {
 	private static boolean isNotAValidPATH(Path path) {
 		return !path.toFile().exists();
 	}
-
 
 	private static CommandLine getCommandLineParser(String args[]) {
 
@@ -155,10 +154,10 @@ public class ProducerServer {
 		double value;
 
 		public Metric(String name, String type, double value) {
-            this.name = name;
-            this.type = type;
-            this.value = value;
-        }
+			this.name = name;
+			this.type = type;
+			this.value = value;
+		}
 
 	}
 
