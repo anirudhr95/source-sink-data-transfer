@@ -11,20 +11,18 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
 
 	private static final Logger log = LoggerFactory.getLogger(ProducerEndpointImpl.class);
 
-
-	private static final int idealBatchSize = 5; // Try batching and send files
-
+	private static final int idealBatchSize = 10; // Try batching and send files
 
 	@Override
 	public void getItem(com.source.queue.RequestFromSink request,
 			io.grpc.stub.StreamObserver<com.source.queue.ResponseFromQueueSource> responseObserver) {
-		
+
 		ResponseFromQueueSource.Builder responseBuilderObj = ResponseFromQueueSource.newBuilder();
 
 		while (InternalQueueImplementation.getQueueSize() > 0) {
 
-			responseBuilderObj.clearFile();		// Makes sure you avoid overflow
-			
+			responseBuilderObj.clearFile(); // Makes sure you avoid overflow
+
 			for (int i = 0; i < this.idealBatchSize; i++) {
 				byte[] file = InternalQueueImplementation.getFileAsBytesFromQueue();
 
@@ -38,9 +36,8 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
 
 			responseObserver.onNext(response);
 		}
-		
+
 		responseObserver.onCompleted();
 	}
-
 
 }

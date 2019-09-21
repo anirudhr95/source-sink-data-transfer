@@ -37,8 +37,6 @@ public class PerformRequestAndSaveFile implements Runnable {
 	// This is an expensive object. Creating 1 for thread an at the beginning.
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 
-	private ListenableFuture<ResponseFromQueueSource> future;
-
 	PerformRequestAndSaveFile(String endpointURL) {
 
 		managedChannel = ManagedChannelBuilder.forTarget(endpointURL).usePlaintext().build();
@@ -73,6 +71,16 @@ public class PerformRequestAndSaveFile implements Runnable {
 				}
 
 			}
+//                        fileList.parallelStream().forEach(byteString -> {
+//                            ResponseJsonPojo responseJsonPojo = null;
+//                            try {
+//                                responseJsonPojo = objectMapper.readValue(byteString.toStringUtf8(), ResponseJsonPojo.class);
+//                                objectMapper.writeValue(new File(responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
+//                            } catch (Exception e) {
+//                                log.error("Error while parsing JSON / Writing to file for JSON - ", byteString.toStringUtf8(), e);
+//                            }
+//
+//                        });
 
 //                        fileList.parallelStream().forEach(byteString -> {
 //                            ResponseJsonPojo responseJsonPojo = null;
@@ -85,7 +93,6 @@ public class PerformRequestAndSaveFile implements Runnable {
 //
 //                        });
 		}
-
-
 	}
+
 }

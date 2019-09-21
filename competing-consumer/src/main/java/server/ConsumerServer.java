@@ -20,7 +20,7 @@ public class ConsumerServer {
     // If I use availableProcessors() I don't need to worry if the processors are hyper-threaded
     private static final int idealNumberOfThreads = (Runtime.getRuntime().availableProcessors() + 1);
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
     	
     	CommandLine commandLine = getCommandLineParser(args);
 

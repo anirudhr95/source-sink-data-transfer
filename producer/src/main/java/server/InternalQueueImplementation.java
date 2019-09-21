@@ -5,6 +5,10 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,26 +52,24 @@ public class InternalQueueImplementation implements Runnable {
 	@Override
 	public void run() {
 
-		DirectoryStream<Path> stream = null;
 		try {
-			stream = Files.newDirectoryStream(this.path); // TODO: Parallelize this
+//        	
+			DirectorySpliterator.list(this.path).parallel().forEach(new Consumer<Path>() {
 
-//            java.util.stream.Stream<Path> s = java.util.stream.StreamSupport.stream(stream.spliterator(), false);
+				public void accept(Path path) {
+					try {
+						arrayBlockingQueue.put(Files.readAllBytes(path));
+					} catch (Exception e) {
+						log.error("Error inserting element {} into the queue, Reason - ", path, e);
+					}
+				}
 
-			for (Path path : stream) {
-				arrayBlockingQueue.put(Files.readAllBytes(path));
-			}
+			});
+
 			log.info("---- Completed writing all the files to internal queue ----");
 
 		} catch (Exception e) {
 			log.error("Error while trying to traverse directory - {}", this.path, e);
-		} finally {
-
-			try {
-				stream.close();
-			} catch (IOException e) {
-				log.error("Error closing DirectoryStream, Reason - ", e);
-			}
 		}
 
 	}
