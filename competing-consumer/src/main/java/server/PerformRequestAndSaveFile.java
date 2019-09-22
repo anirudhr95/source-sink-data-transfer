@@ -1,5 +1,13 @@
 package server;
 
+import java.io.File;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -10,14 +18,6 @@ import com.linecorp.armeria.client.Clients;
 import com.sink.queue.GetMessageFromQueueGrpc;
 import com.sink.queue.RequestFromSink;
 import com.sink.queue.ResponseFromQueueSource;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class PerformRequestAndSaveFile implements Runnable {
 
@@ -29,24 +29,26 @@ public class PerformRequestAndSaveFile implements Runnable {
     //This is an expensive object. Creating 1 for thread an at the beginning.
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    private ListenableFuture<ResponseFromQueueSource> future;
-    private boolean isQueueEmpty;
+    private int numberOfEmptyResponse;
 
+    private ListenableFuture<ResponseFromQueueSource> future;
 
     PerformRequestAndSaveFile(String endpointURL) {
+    	
         this.sinkResponseAsyncStub = Clients.newClient(
                 "gproto+http://" + endpointURL,
                 GetMessageFromQueueGrpc.GetMessageFromQueueFutureStub.class);
 
         this.request = RequestFromSink.newBuilder().build();
-        isQueueEmpty = false;
+        this.numberOfEmptyResponse = 0;
+        
     }
 
 
     @Override
     public void run() {
 
-        while (!isQueueEmpty) {
+        while (numberOfEmptyResponse <= 5) {
 
             this.future = sinkResponseAsyncStub.getItem(request);
 
@@ -56,9 +58,8 @@ public class PerformRequestAndSaveFile implements Runnable {
                     List<ByteString> fileList = result.getFileList();
 
                     if(fileList == null || fileList.size() == 0) {
-                        log.warn("Cannot fetch anymore items - Queue is Empty");
-                        isQueueEmpty = true;
-                        log.warn("Killing thread - {} due to inactivity", Thread.currentThread());
+                        log.warn("Cannot fetch anymore items - Queue is Empty - #{}", numberOfEmptyResponse);
+                        numberOfEmptyResponse++;
                     }
 
 /*
@@ -75,16 +76,29 @@ public class PerformRequestAndSaveFile implements Runnable {
 
                     });
 */
+                    else {
+                    	numberOfEmptyResponse = 0;
+//                        for (ByteString byteString : fileList) {
+//
+//                            try {
+//                                ResponseJsonPojo responseJsonPojo = objectMapper.readValue(byteString.toStringUtf8(), ResponseJsonPojo.class);
+//                                objectMapper.writeValue(new File(responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
+//                            } catch (Exception e) {
+//                                log.error("Error while parsing JSON / Writing to file for JSON - ", byteString.toStringUtf8(), e);
+//                            }
+//
+//                        }
 
-                    for (ByteString byteString : fileList) {
+                        fileList.parallelStream().forEach(byteString -> {
+                            ResponseJsonPojo responseJsonPojo = null;
+                            try {
+                                responseJsonPojo = objectMapper.readValue(byteString.toStringUtf8(), ResponseJsonPojo.class);
+                                objectMapper.writeValue(new File("/data/" + responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
+                            } catch (Exception e) {
+                                log.error("Error while parsing JSON / Writing to file for JSON - ", byteString.toStringUtf8(), e);
+                            }
 
-                        try {
-                            ResponseJsonPojo responseJsonPojo = objectMapper.readValue(byteString.toStringUtf8(), ResponseJsonPojo.class);
-                            objectMapper.writeValue(new File("~/data/"+responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
-                        } catch (Exception e) {
-                            log.error("Error while parsing JSON / Writing to file for JSON - ", byteString.toStringUtf8(), e);
-                        }
-
+                        });
                     }
                 }
 
@@ -102,6 +116,9 @@ public class PerformRequestAndSaveFile implements Runnable {
                 log.error("Error executing future.get() for GRPC endpoint, Reason: ", e);
             }
         }
+
+        if(numberOfEmptyResponse == 5)
+            log.warn("Killing thread - {} due to inactivity", Thread.currentThread());
 
     }
 }
