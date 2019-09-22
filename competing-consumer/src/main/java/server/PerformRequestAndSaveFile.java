@@ -34,12 +34,14 @@ public class PerformRequestAndSaveFile implements Runnable {
     private ListenableFuture<ResponseFromQueueSource> future;
 
     PerformRequestAndSaveFile(String endpointURL) {
+    	
         this.sinkResponseAsyncStub = Clients.newClient(
                 "gproto+http://" + endpointURL,
                 GetMessageFromQueueGrpc.GetMessageFromQueueFutureStub.class);
 
         this.request = RequestFromSink.newBuilder().build();
         this.numberOfEmptyResponse = 0;
+        
     }
 
 
@@ -75,27 +77,28 @@ public class PerformRequestAndSaveFile implements Runnable {
                     });
 */
                     else {
-                        for (ByteString byteString : fileList) {
-
-                            try {
-                                ResponseJsonPojo responseJsonPojo = objectMapper.readValue(byteString.toStringUtf8(), ResponseJsonPojo.class);
-                                objectMapper.writeValue(new File(responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
-                            } catch (Exception e) {
-                                log.error("Error while parsing JSON / Writing to file for JSON - ", byteString.toStringUtf8(), e);
-                            }
-
-                        }
-
-//                        fileList.parallelStream().forEach(byteString -> {
-//                            ResponseJsonPojo responseJsonPojo = null;
+                    	numberOfEmptyResponse = 0;
+//                        for (ByteString byteString : fileList) {
+//
 //                            try {
-//                                responseJsonPojo = objectMapper.readValue(byteString.toStringUtf8(), ResponseJsonPojo.class);
+//                                ResponseJsonPojo responseJsonPojo = objectMapper.readValue(byteString.toStringUtf8(), ResponseJsonPojo.class);
 //                                objectMapper.writeValue(new File(responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
 //                            } catch (Exception e) {
 //                                log.error("Error while parsing JSON / Writing to file for JSON - ", byteString.toStringUtf8(), e);
 //                            }
 //
-//                        });
+//                        }
+
+                        fileList.parallelStream().forEach(byteString -> {
+                            ResponseJsonPojo responseJsonPojo = null;
+                            try {
+                                responseJsonPojo = objectMapper.readValue(byteString.toStringUtf8(), ResponseJsonPojo.class);
+                                objectMapper.writeValue(new File("/data/" + responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
+                            } catch (Exception e) {
+                                log.error("Error while parsing JSON / Writing to file for JSON - ", byteString.toStringUtf8(), e);
+                            }
+
+                        });
                     }
                 }
 

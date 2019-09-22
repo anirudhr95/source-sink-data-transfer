@@ -11,7 +11,7 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
 
     private static final Logger log = LoggerFactory.getLogger(ProducerEndpointImpl.class);
 
-    protected static final int idealBatchSize = 10;        // Try batching and send files
+    protected static final int idealBatchSize = 15;        // Try batching and send files
     protected static int lastBatchSize = 0;        // Try batching and send files
 
     @Override
@@ -26,7 +26,6 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
             if (file == null) {
             	break;
             }
-                
 
             responseBuilderObj.addFile(ByteString.copyFrom(file));
         }
