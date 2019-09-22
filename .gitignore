@@ -182,6 +182,7 @@ modules.xml
 # File-based project format
 
 # IntelliJ
+run_producers_consumers.sh
 
 # mpeltonen/sbt-idea plugin
 
