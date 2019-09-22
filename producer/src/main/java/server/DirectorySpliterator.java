@@ -63,7 +63,7 @@ public class DirectorySpliterator implements Spliterator<Path> {
     }
 
     public static Stream<Path> list(Path parent) throws IOException {
-    	DirectoryStream<Path> ds = Files.newDirectoryStream(parent, "*.json");
+        DirectoryStream<Path> ds = Files.newDirectoryStream(parent, "*.json");
         int splitSize = (Runtime.getRuntime().availableProcessors() * 3);
         DirectorySpliterator spltr = new DirectorySpliterator(ds.iterator(), splitSize);
         return StreamSupport.stream(spltr, false).onClose(() -> {
