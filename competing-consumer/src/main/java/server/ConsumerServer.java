@@ -21,7 +21,7 @@ public class ConsumerServer {
         If I use availableProcessors() I don't need to worry if the processors are hyper-threaded
         as it returns the right number.
      */
-    private static final int idealNumberOfThreads = (Runtime.getRuntime().availableProcessors() + 1);
+    private static final int idealNumberOfThreads = (Runtime.getRuntime().availableProcessors())  * 3;
 
     public static void main(String[] args) {
     	

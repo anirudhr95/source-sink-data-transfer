@@ -53,6 +53,9 @@ public class PerformRequestAndSaveFile implements Runnable {
             Futures.addCallback(future, new FutureCallback<ResponseFromQueueSource>() {
                 @Override
                 public void onSuccess(@NullableDecl ResponseFromQueueSource result) {
+                	
+                	log.info("Received {} files, @ {}", result.getFileList().size(), System.currentTimeMillis());
+                	
                     List<ByteString> fileList = result.getFileList();
 
                     if(fileList == null || fileList.size() == 0) {

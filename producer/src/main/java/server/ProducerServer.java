@@ -71,6 +71,9 @@ public class ProducerServer {
         */
 
         Server server = sb.build();
+        
+        log.info("Starting server @ {}", System.currentTimeMillis());
+        
         server.start().join();
         // DUN DUN DUN!
         
