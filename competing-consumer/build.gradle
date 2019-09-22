@@ -54,18 +54,16 @@ protobuf {
 
 dependencies {
 
-    ['armeria',
-     'armeria-grpc',
-     'armeria-rxjava',
-    ].each {
-        compile "com.linecorp.armeria:${it}:0.90.3"
-    }
-
     // Logging
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.28'
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.9'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.9'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.9'
+    compileOnly "javax.annotation:javax.annotation-api:1.2"
 
     compile group: 'io.grpc', name: 'grpc-netty', version: '1.23.0'
+    // runtime 'io.netty:netty-tcnative-boringssl-static:2.0.25.Final'
     compile group: 'io.grpc', name: 'grpc-protobuf', version: '1.23.0'
     compile group: 'io.grpc', name: 'grpc-stub', version: '1.23.0'
     compile group: 'io.grpc', name: 'grpc-services', version: '1.23.0'
@@ -113,5 +111,6 @@ shadowJar {
                 'Main-Class': 'server.ConsumerServer'
         )
     }
+    mergeServiceFiles()
 }
 

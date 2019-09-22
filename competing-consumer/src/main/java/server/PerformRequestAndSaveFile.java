@@ -3,22 +3,14 @@ package server;
 import java.io.File;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.ByteString;
-import com.linecorp.armeria.client.Clients;
 import com.sink.queue.GetMessageFromQueueGrpc;
 import com.sink.queue.GetMessageFromQueueGrpc.GetMessageFromQueueBlockingStub;
-import com.sink.queue.GetMessageFromQueueGrpc.GetMessageFromQueueStub;
 import com.sink.queue.RequestFromSink;
 import com.sink.queue.ResponseFromQueueSource;
 
@@ -36,13 +28,15 @@ public class PerformRequestAndSaveFile implements Runnable {
 
 	// This is an expensive object. Creating 1 for thread an at the beginning.
 	private static final ObjectMapper objectMapper = new ObjectMapper();
+	private String endpointURL;
 
 	PerformRequestAndSaveFile(String endpointURL) {
 
-		managedChannel = ManagedChannelBuilder.forTarget(endpointURL).usePlaintext().build();
-		this.getMessageFromQueueBlockingStub = GetMessageFromQueueGrpc.newBlockingStub(managedChannel);
-		this.request = RequestFromSink.newBuilder().build();
-		
+		this.endpointURL = endpointURL;
+//		managedChannel = ManagedChannelBuilder.forAddress(endpointURL, 4242).usePlaintext().build();
+//		this.getMessageFromQueueBlockingStub = GetMessageFromQueueGrpc.newBlockingStub(managedChannel);
+//		this.request = RequestFromSink.newBuilder().build();
+
 	}
 
 	@Override
@@ -53,38 +47,51 @@ public class PerformRequestAndSaveFile implements Runnable {
 
 		while (true) {
 
-			responseIterator = getMessageFromQueueBlockingStub.getItem(request);
+			managedChannel = ManagedChannelBuilder.forAddress(this.endpointURL, 4242).usePlaintext().build();
+			this.getMessageFromQueueBlockingStub = GetMessageFromQueueGrpc.newBlockingStub(managedChannel);
+			this.request = RequestFromSink.newBuilder().build();
+
+			try {
+				responseIterator = getMessageFromQueueBlockingStub.getItem(request);
 //			log.info("Received - {} @ {}", responseIterator, System.currentTimeMillis());
 
-			while (responseIterator.hasNext()) {
+				while (responseIterator.hasNext()) {
 
-				ResponseFromQueueSource responseFromQueueSource = responseIterator.next();
-				List<ByteString> fileList = responseFromQueueSource.getFileList();
+					ResponseFromQueueSource responseFromQueueSource = responseIterator.next();
+					List<ByteString> fileList = responseFromQueueSource.getFileList();
 
-//				for (ByteString byteString : fileList) {
+					for (ByteString byteString : fileList) {
+
+						try {
+							ResponseJsonPojo responseJsonPojo = objectMapper.readValue(byteString.toStringUtf8(),
+									ResponseJsonPojo.class);
+							objectMapper.writeValue(new File("/data/" + responseJsonPojo.getMessageId() + ".json"),
+									responseJsonPojo);
+						} catch (Exception e) {
+							log.error("Error while parsing JSON / Writing to file for JSON - ",
+									byteString.toStringUtf8(), e);
+						}
+					}
+
+//              fileList.parallelStream().forEach(byteString -> {
+//              ResponseJsonPojo responseJsonPojo = null;
+//              try {
+//                  responseJsonPojo = objectMapper.readValue(byteString.toStringUtf8(), ResponseJsonPojo.class);
+//                  objectMapper.writeValue(new File("/data/" + responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
+//              } catch (Exception e) {
+//                  log.error("Error while parsing JSON / Writing to file for JSON - ", byteString.toStringUtf8(), e);
+//              }
 //
-//					try {
-//						ResponseJsonPojo responseJsonPojo = objectMapper.readValue(byteString.toStringUtf8(),
-//								ResponseJsonPojo.class);
-//						objectMapper.writeValue(new File(responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
-//					} catch (Exception e) {
-//						log.error("Error while parsing JSON / Writing to file for JSON - ", byteString.toStringUtf8(),
-//								e);
-//					}
-//				}
-				
-              fileList.parallelStream().forEach(byteString -> {
-              ResponseJsonPojo responseJsonPojo = null;
-              try {
-                  responseJsonPojo = objectMapper.readValue(byteString.toStringUtf8(), ResponseJsonPojo.class);
-                  objectMapper.writeValue(new File(responseJsonPojo.getMessageId() + ".json"), responseJsonPojo);
-              } catch (Exception e) {
-                  log.error("Error while parsing JSON / Writing to file for JSON - ", byteString.toStringUtf8(), e);
-              }
+//          });
 
-          });
+				}
 
+			} catch (Exception e) {
+				log.error("Error - {}", e);
+			} finally {
+				this.managedChannel.shutdown();
 			}
+
 		}
 	}
 

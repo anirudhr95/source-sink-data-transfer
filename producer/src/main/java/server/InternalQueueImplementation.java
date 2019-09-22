@@ -22,6 +22,19 @@ public class InternalQueueImplementation implements Runnable {
 	private static ArrayBlockingQueue<byte[]> arrayBlockingQueue;
 
 	private static volatile InternalQueueImplementation internalQueueImplementation;
+	
+	private static final Consumer<Path> consumer = new Consumer<Path>() {
+		
+
+		public void accept(Path path) {
+			try {
+				arrayBlockingQueue.put(Files.readAllBytes(path));
+			} catch (Exception e) {
+				log.error("Error inserting element {} into the queue, Reason - ", path, e);
+			}
+		}
+		
+	};
 
 	public static InternalQueueImplementation getSingletonQueueObject(Path path) {
 
@@ -49,17 +62,7 @@ public class InternalQueueImplementation implements Runnable {
 
 		try {
 
-			DirectorySpliterator.list(this.path).parallel().forEach(new Consumer<Path>() {
-
-				public void accept(Path path) {
-					try {
-						arrayBlockingQueue.put(Files.readAllBytes(path));
-					} catch (Exception e) {
-						log.error("Error inserting element {} into the queue, Reason - ", path, e);
-					}
-				}
-
-			});
+			Files.list(this.path).parallel().forEach(consumer);
 
 			log.info("---- Completed writing all the files to internal queue ----");
 

@@ -17,12 +17,13 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
 	@Override
 	public void getItem(com.source.queue.RequestFromSink request,
 			io.grpc.stub.StreamObserver<com.source.queue.ResponseFromQueueSource> responseObserver) {
-
-		ResponseFromQueueSource.Builder responseBuilderObj = ResponseFromQueueSource.newBuilder();
+		
 		long startTime = System.nanoTime();
 
-		while (InternalQueueImplementation.getQueueSize() > 0) {
+		ResponseFromQueueSource.Builder responseBuilderObj = ResponseFromQueueSource.newBuilder();
 
+		while (InternalQueueImplementation.getQueueSize() > 0) {	
+			
 			responseBuilderObj.clearFile(); // Makes sure you avoid overflow
 
 			for (int i = 0; i < this.idealBatchSize; i++) {
@@ -41,9 +42,10 @@ public class ProducerEndpointImpl extends GetMessageFromQueueGrpc.GetMessageFrom
 			responseObserver.onNext(response);
 //			log.info("Sending {} files @ {}", lastBatchSize, System.currentTimeMillis());
 		}
+		
+		log.info("Total time taken to complete - {}", (System.nanoTime() - startTime) + " ns");
 
 		responseObserver.onCompleted();
-		log.info("Total time taken - {}", System.nanoTime() - startTime + " ns");
 		// »-(¯`·.·´¯)-> PRECISION BOIS <-(¯`·.·´¯)-«
 	}
 
