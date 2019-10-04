@@ -18,7 +18,7 @@ public class ConsumerServer {
     private static final Logger log = LoggerFactory.getLogger(ConsumerServer.class);
 
     // If I use availableProcessors() I don't need to worry if the processors are hyper-threaded
-    private static final int idealNumberOfThreads = 8;
+    private static final int idealNumberOfThreads = 6;
 
     public static void main(String[] args) {
     	
