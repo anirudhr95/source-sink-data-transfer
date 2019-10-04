@@ -90,7 +90,7 @@ public class InternalQueueImplementation implements Runnable {
 		 * leave a buffer of 300 MB.
 		 */
 
-		long safeAndUsableMemory = (Runtime.getRuntime().maxMemory() - (300 * 1024 * 1024));
+		long safeAndUsableMemory = (Runtime.getRuntime().maxMemory() - (100 * 1024 * 1024));
 		log.debug("Assigned maximum memory - {}", safeAndUsableMemory);
 		int safeQueueSize;
 		try {
